@@ -1,0 +1,93 @@
+const pool = require('../config/db');
+
+// Create idea + log initial ownership
+const createIdea = async (userId, title, description) => {
+    const [result] = await pool.execute(
+        'INSERT INTO ideas (user_id, title, description) VALUES (?, ?, ?)',
+        [userId, title, description]
+    );
+
+    const ideaId = result.insertId;
+
+    // Log creation in ledger
+    await pool.execute(
+        'INSERT INTO idea_ownership_ledger (idea_id, owner_id, transaction_type, details) VALUES (?, ?, ?, ?)',
+        [ideaId, userId, 'creation', 'Initial creation']
+    );
+
+    return { id: ideaId, user_id: userId, title, description };
+};
+
+// Add CID layer
+const addIdeaLayer = async (ideaId, layerNumber, content, accessConditions) => {
+    const [result] = await pool.execute(
+        'INSERT INTO idea_layers (idea_id, layer_number, content, access_conditions) VALUES (?, ?, ?, ?)',
+        [ideaId, layerNumber, content, accessConditions]
+    );
+    return { id: result.insertId };
+};
+
+// Get idea layers a user can access
+const getIdeaLayersForUser = async (ideaId, userId) => {
+    // Fetch all layers
+    const [layers] = await pool.execute(
+        'SELECT * FROM idea_layers WHERE idea_id = ? ORDER BY layer_number ASC',
+        [ideaId]
+    );
+
+    // Filter layers based on access_conditions
+    // Example logic: "public", "verified", "owner"
+    const [ownership] = await pool.execute(
+        'SELECT * FROM idea_ownership_ledger WHERE idea_id = ? AND owner_id = ?',
+        [ideaId, userId]
+    );
+
+    const isOwner = ownership.length > 0;
+
+    return layers.filter(layer => {
+        if (!layer.access_conditions || layer.access_conditions === 'public') return true;
+        if (layer.access_conditions === 'owner' && isOwner) return true;
+        // For more complex rules (NDA signed, escrow), extend this logic
+        return false;
+    });
+};
+
+// Browse ideas with CID metadata
+const getAllIdeasForUser = async (userId) => {
+    const [ideas] = await pool.execute('SELECT * FROM ideas ORDER BY created_at DESC');
+
+    // Attach layer info (optional)
+    const ideasWithLayers = [];
+    for (const idea of ideas) {
+        const layers = await getIdeaLayersForUser(idea.id, userId);
+        ideasWithLayers.push({ ...idea, accessible_layers: layers.length });
+    }
+    return ideasWithLayers;
+};
+
+// Transfer or sell idea ownership
+const transferIdeaOwnership = async (ideaId, fromUserId, toUserId, details) => {
+    // Check ownership
+    const [rows] = await pool.execute(
+        'SELECT * FROM idea_ownership_ledger WHERE idea_id = ? AND owner_id = ?',
+        [ideaId, fromUserId]
+    );
+
+    if (rows.length === 0) throw new Error('Only owner can transfer this idea');
+
+    // Log new owner
+    await pool.execute(
+        'INSERT INTO idea_ownership_ledger (idea_id, owner_id, transaction_type, details) VALUES (?, ?, ?, ?)',
+        [ideaId, toUserId, 'transfer', details]
+    );
+
+    return { ideaId, newOwnerId: toUserId };
+};
+
+module.exports = {
+    createIdea,
+    addIdeaLayer,
+    getIdeaLayersForUser,
+    getAllIdeasForUser,
+    transferIdeaOwnership
+};

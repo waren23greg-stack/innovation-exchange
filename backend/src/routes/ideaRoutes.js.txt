@@ -1,0 +1,81 @@
+const express = require('express');
+const router = express.Router();
+const jwt = require('jsonwebtoken');
+const {
+    createIdea,
+    addIdeaLayer,
+    getIdeaLayersForUser,
+    getAllIdeasForUser,
+    transferIdeaOwnership
+} = require('../models/ideaModel');
+
+// JWT Auth Middleware
+const authMiddleware = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(401).json({ msg: 'No token provided' });
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.id;
+        next();
+    } catch (err) {
+        res.status(401).json({ msg: 'Invalid token' });
+    }
+};
+
+// Create idea
+router.post('/create', authMiddleware, async (req, res) => {
+    const { title, description } = req.body;
+    try {
+        const idea = await createIdea(req.userId, title, description);
+        res.json({ idea });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Add CID layer
+router.post('/:ideaId/layer', authMiddleware, async (req, res) => {
+    const { ideaId } = req.params;
+    const { layerNumber, content, accessConditions } = req.body;
+    try {
+        const layer = await addIdeaLayer(ideaId, layerNumber, content, accessConditions);
+        res.json({ layer });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Browse ideas
+router.get('/browse', authMiddleware, async (req, res) => {
+    try {
+        const ideas = await getAllIdeasForUser(req.userId);
+        res.json({ ideas });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get layers user can access
+router.get('/:ideaId/layers', authMiddleware, async (req, res) => {
+    const { ideaId } = req.params;
+    try {
+        const layers = await getIdeaLayersForUser(ideaId, req.userId);
+        res.json({ layers });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Transfer idea ownership
+router.post('/:ideaId/transfer', authMiddleware, async (req, res) => {
+    const { ideaId } = req.params;
+    const { toUserId, details } = req.body;
+    try {
+        const result = await transferIdeaOwnership(ideaId, req.userId, toUserId, details);
+        res.json({ result });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
+
+module.exports = router;
