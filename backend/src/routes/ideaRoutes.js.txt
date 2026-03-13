@@ -1,81 +1,68 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const {
-    createIdea,
-    addIdeaLayer,
-    getIdeaLayersForUser,
-    getAllIdeasForUser,
-    transferIdeaOwnership
-} = require('../models/ideaModel');
+const { checkAuth } = require('../middleware/authMiddleware'); // JWT auth middleware
+const pool = require('../config/db'); // MySQL connection
 
-// JWT Auth Middleware
-const authMiddleware = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.status(401).json({ msg: 'No token provided' });
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.id;
-        next();
-    } catch (err) {
-        res.status(401).json({ msg: 'Invalid token' });
-    }
-};
+// GET idea by ID including layers
+router.get('/:id', checkAuth, async (req, res) => {
+  try {
+    const ideaId = req.params.id;
 
-// Create idea
-router.post('/create', authMiddleware, async (req, res) => {
-    const { title, description } = req.body;
-    try {
-        const idea = await createIdea(req.userId, title, description);
-        res.json({ idea });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    // Fetch idea
+    const [ideaRows] = await pool.query('SELECT id, title, description FROM ideas WHERE id = ?', [ideaId]);
+    if (!ideaRows.length) return res.status(404).json({ error: 'Idea not found' });
+    const idea = ideaRows[0];
+
+    // Fetch layers
+    const [layers] = await pool.query('SELECT id, layer_number, content, access_conditions, owner_id FROM layers WHERE idea_id = ?', [ideaId]);
+
+    // Filter access for frontend (frontend will handle unlocks)
+    res.json({ idea: { ...idea, layers } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Add CID layer
-router.post('/:ideaId/layer', authMiddleware, async (req, res) => {
-    const { ideaId } = req.params;
-    const { layerNumber, content, accessConditions } = req.body;
-    try {
-        const layer = await addIdeaLayer(ideaId, layerNumber, content, accessConditions);
-        res.json({ layer });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+// POST transfer / buy layer
+router.post('/:id/transfer', checkAuth, async (req, res) => {
+  try {
+    const ideaId = req.params.id;
+    const { layerNumber, toUserId } = req.body;
+    const userId = req.user.id;
 
-// Browse ideas
-router.get('/browse', authMiddleware, async (req, res) => {
-    try {
-        const ideas = await getAllIdeasForUser(req.userId);
-        res.json({ ideas });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+    if (!layerNumber || !toUserId) return res.status(400).json({ error: 'Missing parameters' });
 
-// Get layers user can access
-router.get('/:ideaId/layers', authMiddleware, async (req, res) => {
-    const { ideaId } = req.params;
-    try {
-        const layers = await getIdeaLayersForUser(ideaId, req.userId);
-        res.json({ layers });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+    // Fetch layer
+    const [layers] = await pool.query(
+      'SELECT id, layer_number, content, access_conditions, owner_id FROM layers WHERE idea_id = ? AND layer_number = ?',
+      [ideaId, layerNumber]
+    );
 
-// Transfer idea ownership
-router.post('/:ideaId/transfer', authMiddleware, async (req, res) => {
-    const { ideaId } = req.params;
-    const { toUserId, details } = req.body;
-    try {
-        const result = await transferIdeaOwnership(ideaId, req.userId, toUserId, details);
-        res.json({ result });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+    if (!layers.length) return res.status(404).json({ error: 'Layer not found' });
+
+    const layer = layers[0];
+
+    // Owner transfer
+    if (layer.access_conditions === 'owner') {
+      if (layer.owner_id !== userId) return res.status(403).json({ error: 'You are not the owner of this layer' });
+      await pool.query('UPDATE layers SET owner_id = ? WHERE id = ?', [toUserId, layer.id]);
+      return res.json({ result: true });
     }
+
+    // Paid layer purchase
+    if (layer.access_conditions === 'paid') {
+      // Simulate payment: real system would integrate Stripe/PayPal here
+      await pool.query('UPDATE layers SET unlocked_users = JSON_ARRAY_APPEND(IFNULL(unlocked_users, JSON_ARRAY()), "$", ?) WHERE id = ?', [userId, layer.id]);
+      return res.json({ result: true });
+    }
+
+    res.status(400).json({ error: 'Action not allowed for this layer type' });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 module.exports = router;

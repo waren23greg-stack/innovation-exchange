@@ -1,13 +1,12 @@
 const urlParams = new URLSearchParams(window.location.search);
 const ideaId = urlParams.get('id');
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('token'); // JWT token from login
 
 const ideaTitleEl = document.getElementById('ideaTitle');
 const ideaDescriptionEl = document.getElementById('ideaDescription');
 const layersContainer = document.getElementById('layersContainer');
 const filterButtons = document.querySelectorAll('.filters button');
 
-// Modal elements
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');
 const modalText = document.getElementById('modalText');
@@ -22,26 +21,20 @@ let selectedLayerId = null;
 modalClose.addEventListener('click', () => modal.style.display = 'none');
 window.addEventListener('click', (e) => { if(e.target === modal) modal.style.display = 'none'; });
 
-// Fetch idea & layers
+// Fetch idea & layers from backend
 (async () => {
   try {
-    const res = await fetch(`http://localhost:5000/api/ideas/browse`, {
+    const res = await fetch(`http://localhost:5000/api/ideas/${ideaId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
-    const idea = data.ideas.find(i => i.id == ideaId);
-    if (!idea) throw new Error('Idea not found');
+    const idea = data.idea;
 
     ideaTitleEl.textContent = idea.title;
     ideaDescriptionEl.textContent = idea.description;
 
-    // Fetch accessible layers
-    const layersRes = await fetch(`http://localhost:5000/api/ideas/${ideaId}/layers`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const layersData = await layersRes.json();
-    allLayers = layersData.layers.map(l => ({ ...l, unlocked: l.access_conditions !== 'paid' })); // unlock public/owner layers
-
+    // Prepare layers
+    allLayers = idea.layers.map(l => ({ ...l, unlocked: l.access_conditions !== 'paid' }));
     renderLayers('all');
   } catch (err) {
     ideaTitleEl.textContent = 'Error loading idea';
@@ -49,7 +42,7 @@ window.addEventListener('click', (e) => { if(e.target === modal) modal.style.dis
   }
 })();
 
-// Render layers
+// Render layers with filters
 function renderLayers(filterType) {
   layersContainer.innerHTML = '';
   allLayers.forEach(layer => {
@@ -57,7 +50,6 @@ function renderLayers(filterType) {
 
     const layerDiv = document.createElement('div');
     layerDiv.classList.add('layer');
-
     const contentHTML = layer.unlocked ? layer.content : '<em>Locked Layer - Purchase to Unlock</em>';
 
     layerDiv.innerHTML = `
@@ -72,11 +64,10 @@ function renderLayers(filterType) {
     const header = layerDiv.querySelector('.layer-header');
     header.addEventListener('click', e => {
       if(e.target.classList.contains('btn-action')) return;
-      if(layer.access_conditions === 'paid' && !layer.unlocked) return; // locked
+      if(layer.access_conditions === 'paid' && !layer.unlocked) return;
       layerDiv.classList.toggle('open');
     });
 
-    // Modal trigger
     const actionBtn = layerDiv.querySelector('.btn-action');
     if(actionBtn){
       actionBtn.addEventListener('click', () => {
@@ -92,7 +83,7 @@ function renderLayers(filterType) {
   });
 }
 
-// Filter button events
+// Filter buttons
 filterButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     filterButtons.forEach(b => b.classList.remove('active'));
@@ -101,7 +92,7 @@ filterButtons.forEach(btn => {
   });
 });
 
-// Confirm modal action
+// Confirm modal action (purchase / transfer)
 modalConfirm.addEventListener('click', async () => {
   const toUserId = recipientInput.value;
   if(!toUserId){ alert('Please enter recipient User ID'); return; }
@@ -115,7 +106,6 @@ modalConfirm.addEventListener('click', async () => {
     const data = await res.json();
     if(data.result){
       alert('Action successful!');
-      // Unlock layer if it was paid
       const layer = allLayers.find(l => l.layer_number === selectedLayerId);
       if(layer.access_conditions === 'paid') layer.unlocked = true;
       renderLayers('all');
