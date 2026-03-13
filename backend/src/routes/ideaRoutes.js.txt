@@ -1,67 +1,37 @@
 const express = require('express');
-const router = express.Router();
-const { checkAuth } = require('../middleware/authMiddleware'); // JWT auth middleware
-const pool = require('../config/db'); // MySQL connection
+const router  = express.Router();
+const { checkAuth } = require('../middleware/authMiddleware');
+const { createIdea, getAllPublishedIdeas, getIdeaForUser, getIdeasByUser } = require('../models/ideaModel');
 
-// GET idea by ID including layers
-router.get('/:id', checkAuth, async (req, res) => {
-  try {
-    const ideaId = req.params.id;
-
-    // Fetch idea
-    const [ideaRows] = await pool.query('SELECT id, title, description FROM ideas WHERE id = ?', [ideaId]);
-    if (!ideaRows.length) return res.status(404).json({ error: 'Idea not found' });
-    const idea = ideaRows[0];
-
-    // Fetch layers
-    const [layers] = await pool.query('SELECT id, layer_number, content, access_conditions, owner_id FROM layers WHERE idea_id = ?', [ideaId]);
-
-    // Filter access for frontend (frontend will handle unlocks)
-    res.json({ idea: { ...idea, layers } });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
+router.get('/', async (req, res) => {
+  try { res.json({ ideas: await getAllPublishedIdeas() }); }
+  catch (err) { res.status(500).json({ error: 'Could not load ideas.' }); }
 });
 
-// POST transfer / buy layer
-router.post('/:id/transfer', checkAuth, async (req, res) => {
+router.get('/mine', checkAuth, async (req, res) => {
+  try { res.json({ ideas: await getIdeasByUser(req.user.id) }); }
+  catch (err) { res.status(500).json({ error: 'Could not load your ideas.' }); }
+});
+
+router.get('/:id', checkAuth, async (req, res) => {
   try {
-    const ideaId = req.params.id;
-    const { layerNumber, toUserId } = req.body;
-    const userId = req.user.id;
+    const idea = await getIdeaForUser(req.params.id, req.user.id);
+    if (!idea) return res.status(404).json({ error: 'Idea not found.' });
+    res.json({ idea });
+  } catch (err) { res.status(500).json({ error: 'Could not load idea.' }); }
+});
 
-    if (!layerNumber || !toUserId) return res.status(400).json({ error: 'Missing parameters' });
-
-    // Fetch layer
-    const [layers] = await pool.query(
-      'SELECT id, layer_number, content, access_conditions, owner_id FROM layers WHERE idea_id = ? AND layer_number = ?',
-      [ideaId, layerNumber]
-    );
-
-    if (!layers.length) return res.status(404).json({ error: 'Layer not found' });
-
-    const layer = layers[0];
-
-    // Owner transfer
-    if (layer.access_conditions === 'owner') {
-      if (layer.owner_id !== userId) return res.status(403).json({ error: 'You are not the owner of this layer' });
-      await pool.query('UPDATE layers SET owner_id = ? WHERE id = ?', [toUserId, layer.id]);
-      return res.json({ result: true });
-    }
-
-    // Paid layer purchase
-    if (layer.access_conditions === 'paid') {
-      // Simulate payment: real system would integrate Stripe/PayPal here
-      await pool.query('UPDATE layers SET unlocked_users = JSON_ARRAY_APPEND(IFNULL(unlocked_users, JSON_ARRAY()), "$", ?) WHERE id = ?', [userId, layer.id]);
-      return res.json({ result: true });
-    }
-
-    res.status(400).json({ error: 'Action not allowed for this layer type' });
-
+router.post('/', checkAuth, async (req, res) => {
+  const { title, category, askingPriceUsd, layers } = req.body;
+  if (!title?.trim()) return res.status(400).json({ error: 'Title is required.' });
+  if (!category)      return res.status(400).json({ error: 'Category is required.' });
+  if (!layers?.[0]?.content?.trim()) return res.status(400).json({ error: 'Layer 1 content is required.' });
+  try {
+    const idea = await createIdea(req.user.id, { title: title.trim(), category, askingPriceUsd, layers });
+    res.status(201).json({ message: 'Idea submitted and fingerprinted.', idea: { id: idea.id, title: idea.title, fingerprint: idea.idea_fingerprint } });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    if (err.code === '23505') return res.status(409).json({ error: 'Identical idea fingerprint already exists.' });
+    res.status(500).json({ error: 'Could not submit idea.' });
   }
 });
 

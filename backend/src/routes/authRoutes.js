@@ -1,11 +1,21 @@
 const express = require('express');
-const router  = express.Router();
-const jwt     = require('jsonwebtoken');
 const bcrypt  = require('bcrypt');
+const jwt     = require('jsonwebtoken');
+const pool    = require('../config/db');
 const { createUser, getUserByEmail } = require('../models/userModel');
 
-const signAccess  = (u) => jwt.sign({ id: u.id, email: u.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '15m' });
-const signRefresh = (u) => jwt.sign({ id: u.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' });
+const router = express.Router();
+
+const signAccess = (u) => jwt.sign(
+  { id: u.id, email: u.email, username: u.username },
+  process.env.JWT_SECRET,
+  { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+);
+const signRefresh = (u) => jwt.sign(
+  { id: u.id },
+  process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+  { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d' }
+);
 
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
@@ -17,10 +27,14 @@ router.post('/register', async (req, res) => {
     if (await getUserByEmail(email))
       return res.status(409).json({ error: 'An account with this email already exists.' });
     const user = await createUser(username, email, password);
-    res.status(201).json({ user: { id: user.id, username: user.username, email: user.email }, accessToken: signAccess(user), refreshToken: signRefresh(user) });
+    res.status(201).json({
+      user: { id: user.id, username: user.username, email: user.email, kyc_status: user.kyc_status },
+      accessToken:  signAccess(user),
+      refreshToken: signRefresh(user),
+    });
   } catch (err) {
-    console.error('Register error:', err.message);
-    res.status(500).json({ error: 'Server error.' });
+    console.error('[auth/register]', err.message);
+    res.status(500).json({ error: 'Registration failed.' });
   }
 });
 
@@ -34,10 +48,15 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     if (user.is_suspended)
       return res.status(403).json({ error: 'This account has been suspended.' });
-    res.json({ user: { id: user.id, username: user.username, email: user.email, kyc_status: user.kyc_status }, accessToken: signAccess(user), refreshToken: signRefresh(user) });
+    await pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+    res.json({
+      user: { id: user.id, username: user.username, email: user.email, kyc_status: user.kyc_status },
+      accessToken:  signAccess(user),
+      refreshToken: signRefresh(user),
+    });
   } catch (err) {
-    console.error('Login error:', err.message);
-    res.status(500).json({ error: 'Server error.' });
+    console.error('[auth/login]', err.message);
+    res.status(500).json({ error: 'Login failed.' });
   }
 });
 
@@ -45,8 +64,16 @@ router.post('/refresh', (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(400).json({ error: 'Refresh token required.' });
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    res.json({ accessToken: jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' }) });
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+    );
+    const accessToken = jwt.sign(
+      { id: decoded.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    res.json({ accessToken });
   } catch {
     res.status(401).json({ error: 'Invalid or expired refresh token.' });
   }

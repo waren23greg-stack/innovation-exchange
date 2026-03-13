@@ -1,6 +1,5 @@
-const pool   = require('../config/db');
-const bcrypt = require('bcrypt');
-
+const pool        = require('../config/db');
+const bcrypt      = require('bcrypt');
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS || '12');
 
 const createUser = async (username, email, password) => {

@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Innovation Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0D1B2A; --navy-mid:#152233; --navy-light:#1E3A5F;
+  --teal:#00C9A7; --teal-dim:#009E84; --teal-ghost:rgba(0,201,167,0.08); --teal-border:rgba(0,201,167,0.22);
+  --gold:#F4A435; --gold-dim:#C8831F; --gold-ghost:rgba(244,164,53,0.08); --gold-border:rgba(244,164,53,0.22);
+  --white:#FFFFFF; --muted:#8599AE; --mid:#C2D4E0;
+  --border:rgba(255,255,255,0.065); --surface:rgba(255,255,255,0.028); --surface-hover:rgba(255,255,255,0.052);
+  --danger:#E05252; --success:#3DC97A; --info:#4A9EFF;
+  --sidebar-w:248px; --topbar-h:62px;
+  --r-s:6px; --r-m:11px; --r-l:18px; --r-xl:26px;
+  --font-d:'Syne',sans-serif; --font-b:'DM Sans',sans-serif; --font-m:'DM Mono',monospace;
+  --t:0.14s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:var(--font-b);background:var(--navy);color:var(--white);min-height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+.icon{display:inline-block;width:18px;height:18px;flex-shrink:0;vertical-align:middle}
+.icon-sm{width:14px;height:14px} .icon-lg{width:24px;height:24px} .icon-xl{width:32px;height:32px}
+#app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:var(--navy-mid);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:10}
+.sidebar-logo{padding:18px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;text-decoration:none;cursor:pointer}
+.logo-mark{width:36px;height:36px;flex-shrink:0;border-radius:9px;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center}
+.logo-mark-inner{font-family:'Georgia',serif;font-size:14px;font-weight:700;color:var(--navy);letter-spacing:-0.5px;line-height:1}
+.logo-name{font-family:var(--font-d);font-size:13.5px;font-weight:700;color:var(--white);letter-spacing:-0.2px;line-height:1.2}
+.logo-tagline{font-size:10px;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;margin-top:1px}
+.nav-body{flex:1;overflow-y:auto;padding:14px 10px}
+.nav-body::-webkit-scrollbar{width:2px}
+.nav-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);border-radius:2px}
+.nav-lbl{font-size:9.5px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);padding:0 8px;margin:16px 0 5px}
+.nav-lbl:first-child{margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--r-s);cursor:pointer;color:var(--muted);font-size:13px;font-weight:400;transition:all var(--t);border:1px solid transparent;user-select:none}
+.nav-item:hover{background:var(--surface-hover);color:var(--mid)}
+.nav-item.active{background:var(--teal-ghost);color:var(--teal);border-color:var(--teal-border)}
+.nav-item .icon{color:inherit}
+.nav-badge{background:var(--teal);color:var(--navy);font-family:var(--font-m);font-size:10px;font-weight:500;padding:1px 6px;border-radius:10px;line-height:1.6;margin-left:auto}
+.sidebar-user{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background var(--t)}
+.sidebar-user:hover{background:var(--surface-hover)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--teal-dim),var(--navy-light));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--white);flex-shrink:0;border:1.5px solid var(--teal-border)}
+.user-name{font-size:12.5px;font-weight:500;color:var(--white)}
+.user-role{font-size:10.5px;color:var(--teal);display:flex;align-items:center;gap:4px;margin-top:1px}
+.user-role::before{content:'';width:5px;height:5px;background:var(--teal);border-radius:50%}
+
+/* MAIN */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:var(--topbar-h);background:var(--navy-mid);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;gap:14px;flex-shrink:0}
+.topbar-title{font-family:var(--font-d);font-size:17px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-wrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:0 12px;gap:8px;width:250px;transition:border-color var(--t);height:36px}
+.search-wrap:focus-within{border-color:var(--teal)}
+.search-wrap .icon{color:var(--muted)}
+.search-input{background:none;border:none;outline:none;color:var(--white);font-size:13px;font-family:var(--font-b);width:100%}
+.search-input::placeholder{color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-s);background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all var(--t);position:relative}
+.icon-btn:hover{border-color:rgba(255,255,255,0.15);color:var(--white)}
+.notif-dot{width:7px;height:7px;background:var(--teal);border-radius:50%;position:absolute;top:7px;right:7px;border:1.5px solid var(--navy-mid)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 17px;border-radius:var(--r-m);font-size:13px;font-weight:500;font-family:var(--font-b);cursor:pointer;transition:all var(--t);border:none;white-space:nowrap;line-height:1}
+.btn-primary{background:var(--teal);color:var(--navy)} .btn-primary:hover{background:var(--teal-dim)}
+.btn-gold{background:var(--gold);color:var(--navy)} .btn-gold:hover{background:var(--gold-dim)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--mid)} .btn-ghost:hover{border-color:rgba(255,255,255,0.18);color:var(--white);background:var(--surface-hover)}
+.btn-sm{padding:6px 12px;font-size:12px} .btn-full{width:100%;justify-content:center}
+
+/* PAGE */
+.page-content{flex:1;overflow-y:auto;padding:26px}
+.page-content::-webkit-scrollbar{width:4px}
+.page-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
+.page{display:none;animation:fadeUp 0.18s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+.page-heading{font-family:var(--font-d);font-size:21px;font-weight:700}
+.page-sub{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* PANELS */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);overflow:hidden}
+.panel-header{padding:16px 20px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-family:var(--font-d);font-size:13.5px;font-weight:600}
+.panel-body{padding:18px 20px}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:18px 20px;position:relative;overflow:hidden;transition:border-color var(--t)}
+.stat-card:hover{border-color:rgba(255,255,255,0.12)}
+.stat-glow{position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;opacity:0.07;pointer-events:none}
+.stat-label{font-size:10.5px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.stat-value{font-family:var(--font-d);font-size:26px;font-weight:700;line-height:1;margin-bottom:7px}
+.stat-change{font-size:11.5px;color:var(--success);display:flex;align-items:center;gap:4px}
+.c-teal{color:var(--teal)} .c-gold{color:var(--gold)} .c-info{color:var(--info)} .c-pink{color:#E06DB0}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.grid-3-1{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px}
+
+/* ACTIVITY */
+.activity-item{display:flex;align-items:flex-start;gap:11px;padding:13px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none;padding-bottom:0}
+.activity-dot{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.activity-dot.teal{background:var(--teal-ghost);color:var(--teal);border:1px solid var(--teal-border)}
+.activity-dot.gold{background:var(--gold-ghost);color:var(--gold);border:1px solid var(--gold-border)}
+.activity-dot.info{background:rgba(74,158,255,0.09);color:var(--info);border:1px solid rgba(74,158,255,0.22)}
+.activity-text{flex:1}
+.activity-title{font-size:12.5px;color:var(--mid);line-height:1.45}
+.activity-title strong{font-weight:500;color:var(--teal)}
+.activity-time{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* IDEA CARDS */
+.ideas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(295px,1fr));gap:16px}
+.idea-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:20px;cursor:pointer;transition:all 0.18s;position:relative;overflow:hidden}
+.idea-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--gold));opacity:0;transition:opacity 0.18s}
+.idea-card:hover{border-color:var(--teal-border);background:var(--surface-hover);transform:translateY(-2px)}
+.idea-card:hover::after{opacity:1}
+.idea-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:11px}
+.cat-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:3px 9px;border-radius:20px}
+.cat-tag.teal{background:var(--teal-ghost);color:var(--teal);border:1px solid var(--teal-border)}
+.cat-tag.gold{background:var(--gold-ghost);color:var(--gold);border:1px solid var(--gold-border)}
+.cat-tag.info{background:rgba(74,158,255,0.08);color:var(--info);border:1px solid rgba(74,158,255,0.22)}
+.score-ring{width:34px;height:34px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.score-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.score-ring-num{position:relative;font-size:9.5px;font-weight:600;font-family:var(--font-m);color:var(--teal);z-index:1}
+.idea-title{font-family:var(--font-d);font-size:14.5px;font-weight:600;line-height:1.3;margin-bottom:8px}
+.idea-teaser{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.idea-meta{display:flex;align-items:center;gap:12px;padding-top:13px;border-top:1px solid var(--border)}
+.meta-item{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted)}
+.meta-price{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--gold)}
+
+/* CID LAYERS */
+.cid-layers{display:flex;flex-direction:column;gap:10px}
+.layer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);overflow:hidden;transition:border-color var(--t)}
+.layer-card:hover{border-color:rgba(255,255,255,0.11)}
+.layer-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+.layer-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:11.5px;font-weight:500;flex-shrink:0}
+.layer-num.open{background:var(--teal-ghost);color:var(--teal);border:1px solid var(--teal-border)}
+.layer-num.locked{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.layer-num.gold-n{background:var(--gold-ghost);color:var(--gold);border:1px solid var(--gold-border)}
+.layer-info{flex:1}
+.layer-name{font-size:13px;font-weight:500}
+.layer-reqs{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.req-tag{font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--border);color:var(--muted);background:var(--surface);display:flex;align-items:center;gap:3px}
+.req-tag.met{background:rgba(61,201,122,0.07);border-color:rgba(61,201,122,0.22);color:var(--success)}
+.layer-badge{font-size:10.5px;font-weight:500;padding:3px 9px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.layer-badge.open{background:rgba(61,201,122,0.1);color:var(--success)}
+.layer-badge.nda{background:var(--gold-ghost);color:var(--gold)}
+.layer-badge.escrow{background:rgba(74,158,255,0.09);color:var(--info)}
+.layer-badge.locked{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.layer-body{padding:0 16px 16px 56px;display:none}
+.layer-card.is-open .layer-body{display:block}
+.content-box{background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:var(--r-m);padding:14px 16px;font-size:13px;line-height:1.75;color:var(--mid);position:relative;overflow:hidden}
+.watermark-txt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-family:var(--font-m);font-size:10px;color:rgba(0,201,167,0.055);white-space:nowrap;pointer-events:none;user-select:none;letter-spacing:2px;font-weight:600}
+.locked-prompt{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px;text-align:center}
+.locked-prompt p{font-size:12.5px;color:var(--muted);line-height:1.55}
+
+/* FINGERPRINT */
+.fp-card{background:rgba(0,201,167,0.04);border:1px solid var(--teal-border);border-radius:var(--r-l);padding:18px 20px;margin-bottom:18px}
+.fp-label{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+.fp-hash{font-family:var(--font-m);font-size:12px;color:var(--teal);word-break:break-all;line-height:1.65}
+.fp-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid var(--teal-border)}
+.fp-meta-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.fp-meta-val{font-size:12px;font-weight:500;color:var(--white);font-family:var(--font-m)}
+.verified-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--success);margin-top:7px}
+
+/* SCORE */
+.score-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.score-dim{background:rgba(0,0,0,0.14);border:1px solid var(--border);border-radius:var(--r-m);padding:12px 14px}
+.score-dim-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);margin-bottom:7px}
+.score-bar-track{background:rgba(255,255,255,0.04);border-radius:3px;height:3px;overflow:hidden;margin-bottom:5px}
+.score-bar-fill{height:100%;border-radius:3px;background:var(--teal)}
+.score-dim-val{font-size:14px;font-weight:600;font-family:var(--font-d)}
+
+/* FORMS */
+.form-group{margin-bottom:20px}
+.form-label{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--mid);margin-bottom:7px;letter-spacing:0.2px}
+.form-label .req{color:var(--danger);margin-left:3px}
+.form-label .hint{font-size:11px;font-weight:400;color:var(--muted)}
+.form-input,.form-textarea,.form-select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:11px 14px;color:var(--white);font-size:13.5px;font-family:var(--font-b);outline:none;transition:border-color var(--t)}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--teal)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-textarea{min-height:90px;resize:vertical;line-height:1.6}
+.form-select option{background:var(--navy-mid)}
+
+/* LAYER BUILDER */
+.lb-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);overflow:hidden;margin-bottom:11px}
+.lb-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,0,0,0.12);border-bottom:1px solid var(--border)}
+.lb-tag{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.lt-1{background:rgba(61,201,122,0.1);color:var(--success)}
+.lt-2{background:var(--teal-ghost);color:var(--teal)}
+.lt-3{background:rgba(74,158,255,0.09);color:var(--info)}
+.lt-4{background:var(--gold-ghost);color:var(--gold)}
+.lt-5{background:rgba(224,82,82,0.09);color:var(--danger)}
+.lb-cond{font-size:11px;color:var(--muted);margin-left:auto}
+.lb-body{padding:12px 14px}
+
+/* LEDGER */
+.ledger-line{position:relative;padding-left:28px}
+.ledger-line::before{content:'';position:absolute;left:9px;top:8px;bottom:8px;width:1px;background:var(--border)}
+.ledger-event{position:relative;margin-bottom:16px}
+.ledger-dot{position:absolute;left:-24px;top:13px;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--navy-mid)}
+.ledger-dot.teal{background:var(--teal)} .ledger-dot.gold{background:var(--gold)} .ledger-dot.info{background:var(--info)}
+.ledger-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:13px 15px}
+.ledger-lbl{font-size:10.5px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:5px}
+.ledger-lbl.teal{color:var(--teal)} .ledger-lbl.gold{color:var(--gold)} .ledger-lbl.info{color:var(--info)}
+.ledger-desc{font-size:12.5px;color:var(--mid)}
+.ledger-time{font-size:11px;color:var(--muted);margin-top:2px}
+.ledger-hash{font-family:var(--font-m);font-size:10.5px;color:var(--muted);margin-top:7px;padding:5px 9px;background:rgba(0,0,0,0.18);border-radius:5px;word-break:break-all}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:500}
+.badge.verified{background:rgba(61,201,122,0.1);color:var(--success);border:1px solid rgba(61,201,122,0.22)}
+.badge.pending{background:var(--gold-ghost);color:var(--gold);border:1px solid var(--gold-border)}
+.badge.pro{background:var(--teal-ghost);color:var(--teal);border:1px solid var(--teal-border)}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.data-table th{text-align:left;padding:9px 15px;font-size:10.5px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+.data-table td{padding:12px 15px;border-bottom:1px solid var(--border);color:var(--mid);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:var(--surface-hover);cursor:pointer}
+
+/* FILTER CHIPS */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.chip{padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--surface);transition:all var(--t);user-select:none;display:flex;align-items:center;gap:5px}
+.chip:hover{border-color:rgba(255,255,255,0.14);color:var(--white)}
+.chip.active{background:var(--teal-ghost);border-color:var(--teal-border);color:var(--teal)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(8,16,26,0.88);backdrop-filter:blur(10px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--navy-mid);border:1px solid var(--teal-border);border-radius:var(--r-xl);padding:30px;max-width:500px;width:100%;position:relative;animation:mIn 0.18s ease}
+@keyframes mIn{from{opacity:0;transform:scale(0.97) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-x{position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all var(--t)}
+.modal-x:hover{color:var(--white);border-color:rgba(255,255,255,0.18)}
+.modal-title{font-family:var(--font-d);font-size:19px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:22px}
+.nda-box{background:var(--gold-ghost);border:1px solid var(--gold-border);border-radius:var(--r-m);padding:14px 16px;margin-bottom:18px}
+.nda-box-lbl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.nda-text{font-size:12px;color:var(--mid);line-height:1.65}
+.nda-check-row{display:flex;align-items:center;gap:9px;margin-top:11px;padding-top:11px;border-top:1px solid var(--gold-border)}
+.checkbox{width:16px;height:16px;border-radius:4px;border:1px solid rgba(244,164,53,0.4);background:transparent;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.checkbox.checked{background:var(--gold);border-color:var(--gold)}
+.escrow-row{background:rgba(74,158,255,0.06);border:1px solid rgba(74,158,255,0.2);border-radius:var(--r-m);padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.escrow-amt{font-family:var(--font-d);font-size:22px;font-weight:700;color:var(--info)}
+
+/* MESSAGES */
+.msg-out{display:flex;justify-content:flex-end;margin-bottom:10px}
+.msg-in{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.bubble{padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.6;max-width:76%}
+.bubble.out{background:var(--teal-ghost);border:1px solid var(--teal-border);color:var(--white);border-radius:12px 12px 2px 12px}
+.bubble.in{background:var(--surface);border:1px solid var(--border);color:var(--mid);border-radius:12px 12px 12px 2px}
+
+/* KYC */
+.kyc-bar{display:flex;gap:5px;margin-bottom:18px}
+.kyc-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.06)}
+.kyc-step.done{background:var(--teal)}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:9px;pointer-events:none}
+.toast{background:var(--navy-light);border:1px solid var(--border);border-radius:var(--r-m);padding:11px 16px;font-size:12.5px;color:var(--white);display:flex;align-items:center;gap:9px;min-width:260px;box-shadow:0 8px 28px rgba(0,0,0,0.35);animation:tIn 0.22s ease;pointer-events:all}
+.toast.success{border-left:3px solid var(--success)} .toast.warning{border-left:3px solid var(--gold)} .toast.error{border-left:3px solid var(--danger)} .toast.info{border-left:3px solid var(--teal)}
+@keyframes tIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* IDEA HERO */
+.idea-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:26px;margin-bottom:20px;position:relative;overflow:hidden}
+.idea-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,201,167,0.07),transparent 70%);pointer-events:none}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;margin-bottom:18px;background:none;border:none;font-family:var(--font-b);padding:0;transition:color var(--t)}
+.back-btn:hover{color:var(--white)}
+
+/* UTILS */
+hr.divider{border:none;border-top:1px solid var(--border);margin:22px 0}
+.mb-4{margin-bottom:4px} .mb-8{margin-bottom:8px} .mb-12{margin-bottom:12px} .mb-16{margin-bottom:16px} .mb-20{margin-bottom:20px} .mb-24{margin-bottom:24px}
+.text-muted{color:var(--muted)} .text-mid{color:var(--mid)} .text-teal{color:var(--teal)} .text-gold{color:var(--gold)}
+.text-sm{font-size:12px} .text-xs{font-size:11px}
+.font-mono{font-family:var(--font-m)} .font-d{font-family:var(--font-d)}
+.fw-500{font-weight:500} .fw-600{font-weight:600} .fw-700{font-weight:700}
+.flex{display:flex} .flex-c{display:flex;align-items:center} .flex-b{display:flex;align-items:center;justify-content:space-between}
+.gap-4{gap:4px} .gap-8{gap:8px} .gap-10{gap:10px} .gap-12{gap:12px} .gap-16{gap:16px}
+</style>
+</head>
+<body>
+
+<!-- SVG ICON SPRITE -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-market" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></symbol>
+  <symbol id="i-briefcase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></symbol>
+  <symbol id="i-ledger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></symbol>
+  <symbol id="i-fp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 17.5a14.5 14.5 0 0 0 4.56 5.58"/><path d="M20 12c0 1.3-.23 2.55-.67 3.7"/><path d="M6 10a6 6 0 0 1 11.47-1.8"/><path d="M7.5 14.5c.58 2.06 1.39 4.13 2.5 6"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></symbol>
+  <symbol id="i-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></symbol>
+  <symbol id="cat-health" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+  <symbol id="cat-ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1.5"/><rect x="14" y="2" width="8" height="8" rx="1.5"/><rect x="2" y="14" width="8" height="8" rx="1.5"/><path d="M14 18h8M18 14v8M6 10v4M10 6h4"/></symbol>
+  <symbol id="cat-energy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="cat-fintech" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+  <symbol id="cat-agri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z"/><path d="M12 12C12 12 17 10 19 6c-4 0-7 2-7 6z"/><path d="M5 22h14"/></symbol>
+  <symbol id="cat-edtech" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+</svg>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"><span class="logo-mark-inner">IX</span></div>
+      <div>
+        <div class="logo-name">Innovation Exchange</div>
+        <div class="logo-tagline">Ideas as Assets</div>
+      </div>
+    </div>
+    <nav class="nav-body">
+      <div class="nav-lbl">Main</div>
+      <div class="nav-item active" data-page="dashboard"><svg class="icon"><use href="#i-dashboard"/></svg><span>Dashboard</span></div>
+      <div class="nav-item" data-page="marketplace"><svg class="icon"><use href="#i-market"/></svg><span>Marketplace</span><span class="nav-badge">47</span></div>
+      <div class="nav-lbl">My Ideas</div>
+      <div class="nav-item" data-page="submit"><svg class="icon"><use href="#i-plus"/></svg><span>Submit Idea</span></div>
+      <div class="nav-item" data-page="my-ideas"><svg class="icon"><use href="#i-briefcase"/></svg><span>My Portfolio</span></div>
+      <div class="nav-item" data-page="ledger"><svg class="icon"><use href="#i-ledger"/></svg><span>Ownership Ledger</span></div>
+      <div class="nav-lbl">Discovery</div>
+      <div class="nav-item" data-page="investors"><svg class="icon"><use href="#i-users"/></svg><span>Investors</span></div>
+      <div class="nav-item" data-page="messages"><svg class="icon"><use href="#i-msg"/></svg><span>Secure Messages</span><span class="nav-badge">3</span></div>
+      <div class="nav-lbl">Account</div>
+      <div class="nav-item" data-page="profile"><svg class="icon"><use href="#i-user"/></svg><span>Profile &amp; KYC</span></div>
+      <div class="nav-item" data-page="settings"><svg class="icon"><use href="#i-settings"/></svg><span>Settings</span></div>
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-avatar">IW</div>
+      <div>
+        <div class="user-name">Idea Wizard</div>
+        <div class="user-role">Pro Innovator</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="search-wrap">
+        <svg class="icon icon-sm"><use href="#i-search"/></svg>
+        <input class="search-input" placeholder="Search ideas, investors, categories" id="global-search">
+      </div>
+      <div class="topbar-right">
+        <div class="icon-btn"><svg class="icon icon-sm"><use href="#i-bell"/></svg><span class="notif-dot"></span></div>
+        <button class="btn btn-primary" onclick="navigate('submit')"><svg class="icon icon-sm"><use href="#i-plus"/></svg>Submit Idea</button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-glow" style="background:var(--teal)"></div><div class="stat-label">Active Ideas</div><div class="stat-value c-teal">7</div><div class="stat-change"><svg class="icon icon-sm"><use href="#i-trend"/></svg>2 added this month</div></div>
+          <div class="stat-card"><div class="stat-glow" style="background:var(--gold)"></div><div class="stat-label">Portfolio Valuation</div><div class="stat-value c-gold">$284K</div><div class="stat-change"><svg class="icon icon-sm"><use href="#i-trend"/></svg>18% vs last quarter</div></div>
+          <div class="stat-card"><div class="stat-glow" style="background:var(--info)"></div><div class="stat-label">Layer Unlocks</div><div class="stat-value c-info">34</div><div class="stat-change"><svg class="icon icon-sm"><use href="#i-trend"/></svg>12 new this week</div></div>
+          <div class="stat-card"><div class="stat-glow" style="background:#E06DB0"></div><div class="stat-label">NDA Agreements</div><div class="stat-value c-pink">11</div><div class="stat-change"><svg class="icon icon-sm"><use href="#i-trend"/></svg>3 pending review</div></div>
+        </div>
+        <div class="grid-3-1">
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">Recent Activity</div><button class="btn btn-ghost btn-sm">View all</button></div>
+            <div class="panel-body">
+              <div class="activity-item"><div class="activity-dot teal"><svg class="icon icon-sm"><use href="#i-unlock"/></svg></div><div class="activity-text"><div class="activity-title"><strong>Nexus Capital</strong> unlocked Layer 3 on "AI Triage System"</div><div class="activity-time">2 hours ago &middot; $500 escrow deposited</div></div></div>
+              <div class="activity-item"><div class="activity-dot gold"><svg class="icon icon-sm"><use href="#i-doc"/></svg></div><div class="activity-text"><div class="activity-title"><strong>Priya Menon</strong> signed NDA for "Smart Grid Protocol"</div><div class="activity-time">5 hours ago &middot; DocuSign #ENV-8821</div></div></div>
+              <div class="activity-item"><div class="activity-dot info"><svg class="icon icon-sm"><use href="#i-shield"/></svg></div><div class="activity-text"><div class="activity-title">Innovation Score updated for "BioSense Array" &mdash; <strong>91/100</strong></div><div class="activity-time">Yesterday &middot; +3 pts novelty improvement</div></div></div>
+              <div class="activity-item"><div class="activity-dot gold"><svg class="icon icon-sm"><use href="#i-dollar"/></svg></div><div class="activity-text"><div class="activity-title">Licensing offer received for "Carbon Protocol" &mdash; <strong>$45,000</strong></div><div class="activity-time">2 days ago &middot; 5% royalty + upfront</div></div></div>
+              <div class="activity-item"><div class="activity-dot teal"><svg class="icon icon-sm"><use href="#i-check"/></svg></div><div class="activity-text"><div class="activity-title">KYC verification <strong>completed</strong> &mdash; Pro Innovator status active</div><div class="activity-time">3 days ago &middot; Jumio #KYC-4492</div></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="panel">
+              <div class="panel-header"><div class="panel-title">IOL Integrity</div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-check"/></svg>Live</span></div>
+              <div class="panel-body">
+                <div class="text-sm text-muted mb-12" style="line-height:1.65;">7 ideas anchored to Hyperledger Fabric. Last sync: <span class="text-teal">2 min ago</span></div>
+                <div class="fp-card" style="margin-bottom:0;padding:14px 16px;">
+                  <div class="fp-label"><svg class="icon icon-sm"><use href="#i-chain"/></svg>Latest IOL Entry</div>
+                  <div class="fp-hash text-xs">a4f2b8c1...cc3 &middot; Block #1,847,322</div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div class="panel-title">Top Performing</div></div>
+              <div>
+                <div class="activity-item" style="padding:12px 18px;cursor:pointer;" onclick="openDetail()"><div style="width:34px;height:34px;background:var(--teal-ghost);border:1px solid var(--teal-border);border-radius:var(--r-m);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg class="icon" style="color:var(--teal)"><use href="#cat-health"/></svg></div><div class="activity-text"><div style="font-size:12.5px;font-weight:500;color:var(--white);">BioSense Array</div><div class="text-xs text-teal">Score 91 &middot; 12 views &middot; $120K</div></div></div>
+                <div class="activity-item" style="padding:12px 18px;cursor:pointer;border-bottom:none;"><div style="width:34px;height:34px;background:var(--gold-ghost);border:1px solid var(--gold-border);border-radius:var(--r-m);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg class="icon" style="color:var(--gold)"><use href="#cat-energy"/></svg></div><div class="activity-text"><div style="font-size:12.5px;font-weight:500;color:var(--white);">Smart Grid Protocol</div><div class="text-xs text-gold">Score 87 &middot; 8 views &middot; $84K</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div class="page" id="page-marketplace">
+        <div class="page-header">
+          <div><div class="page-heading">Idea Marketplace</div><div class="page-sub">47 verified ideas. All creators KYC-verified. All IP cryptographically fingerprinted.</div></div>
+          <select class="form-select" style="width:190px;"><option>Sort: Innovation Score</option><option>Sort: Newest First</option><option>Sort: Asking Price</option></select>
+        </div>
+        <div class="filter-bar">
+          <div class="chip active">All</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-health"/></svg>Health Tech</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-ai"/></svg>AI / ML</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-energy"/></svg>Clean Energy</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-fintech"/></svg>Fintech</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-agri"/></svg>AgriTech</div>
+          <div class="chip"><svg class="icon icon-sm"><use href="#cat-edtech"/></svg>EdTech</div>
+        </div>
+        <div class="ideas-grid">
+          <div class="idea-card" onclick="openDetail()">
+            <div class="idea-card-top"><div class="cat-tag teal"><svg class="icon icon-sm"><use href="#cat-health"/></svg>Health Tech</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="87.96 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">91</span></div></div>
+            <div class="idea-title">BioSense Array — Non-Invasive Metabolic Monitor</div>
+            <div class="idea-teaser">Continuous real-time tracking of 14 metabolic markers through skin-mounted photonic sensor array. No blood draws. Sub-2% margin of error.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>5 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>12 views</div><div class="meta-price">$120,000</div></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-card-top"><div class="cat-tag gold"><svg class="icon icon-sm"><use href="#cat-energy"/></svg>Clean Energy</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="76.5 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">87</span></div></div>
+            <div class="idea-title">Smart Grid Protocol — AI-Driven Demand Prediction</div>
+            <div class="idea-teaser">Decentralized energy routing using edge AI nodes to predict demand 4 hours ahead with 96% accuracy. Cuts grid waste by 31%.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>4 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>8 views</div><div class="meta-price">$84,000</div></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-card-top"><div class="cat-tag info"><svg class="icon icon-sm"><use href="#cat-ai"/></svg>AI / ML</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="82.74 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">94</span></div></div>
+            <div class="idea-title">NeuralRoute — Explainable AI Logistics Engine</div>
+            <div class="idea-teaser">Route optimization model that explains every decision in plain language. Auditable for regulated industries. Reduces freight costs by 22%.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>5 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>21 views</div><div class="meta-price">$200,000</div></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-card-top"><div class="cat-tag teal"><svg class="icon icon-sm"><use href="#cat-fintech"/></svg>Fintech</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="69.5 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">79</span></div></div>
+            <div class="idea-title">MicroSave — Behavioral Micro-Savings for Gen Z</div>
+            <div class="idea-teaser">Auto-invests the rounding difference on every transaction into curated micro-ETFs. Zero manual effort, automatic portfolio rebalancing.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>3 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>6 views</div><div class="meta-price" style="color:var(--teal)">License Only</div></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-card-top"><div class="cat-tag gold"><svg class="icon icon-sm"><use href="#cat-agri"/></svg>AgriTech</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="72.1 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">82</span></div></div>
+            <div class="idea-title">SoilIQ — Soil Microbiome Intelligence Platform</div>
+            <div class="idea-teaser">Mobile soil scanner with AI analysis prescribing hyper-local fertilizer blends per 10m² grid. Reduces fertilizer spend by 40%.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>4 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>9 views</div><div class="meta-price">$65,000</div></div>
+          </div>
+          <div class="idea-card">
+            <div class="idea-card-top"><div class="cat-tag info"><svg class="icon icon-sm"><use href="#cat-edtech"/></svg>EdTech</div><div class="score-ring"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/><circle cx="17" cy="17" r="14" fill="none" stroke="#00C9A7" stroke-width="2.5" stroke-dasharray="77.4 87.96" stroke-linecap="round"/></svg><span class="score-ring-num">88</span></div></div>
+            <div class="idea-title">MindPath — Adaptive Curriculum Engine for K-12</div>
+            <div class="idea-teaser">Maps each student's cognitive load in real-time and dynamically reorders curriculum to reduce dropout risk. 67% improvement in test outcomes.</div>
+            <div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-lock"/></svg>5 layers</div><div class="meta-item"><svg class="icon icon-sm"><use href="#i-eye"/></svg>15 views</div><div class="meta-price">$155,000</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IDEA DETAIL -->
+      <div class="page" id="page-detail">
+        <button class="back-btn" onclick="navigate('marketplace')"><svg class="icon icon-sm"><use href="#i-back"/></svg>Back to Marketplace</button>
+        <div class="idea-hero">
+          <div class="flex-b gap-16" style="flex-wrap:wrap;align-items:flex-start;">
+            <div style="flex:1;min-width:0;">
+              <div class="flex-c gap-8 mb-12">
+                <div class="cat-tag teal"><svg class="icon icon-sm"><use href="#cat-health"/></svg>Health Tech</div>
+                <span class="badge verified"><svg class="icon icon-sm"><use href="#i-shield"/></svg>KYC Verified</span>
+                <span class="badge pro">Score 91</span>
+              </div>
+              <div class="font-d fw-600 mb-8" style="font-size:22px;line-height:1.25;">BioSense Array — Non-Invasive Metabolic Monitor</div>
+              <div class="text-sm text-muted" style="max-width:580px;line-height:1.7;">Continuous, real-time tracking of 14 metabolic markers through skin-mounted photonic sensor array. No blood draws, no calibration. Sub-2% margin of error validated in 3 clinical trials.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;align-items:flex-end;flex-shrink:0;">
+              <div class="font-d fw-600 c-gold" style="font-size:28px;">$120,000</div>
+              <div class="text-xs text-muted">or license from $8,000/yr</div>
+              <button class="btn btn-gold" onclick="openModal('modal-nda')"><svg class="icon icon-sm"><use href="#i-doc"/></svg>View Layer 2 &mdash; Sign NDA</button>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('messages')"><svg class="icon icon-sm"><use href="#i-msg"/></svg>Message Creator</button>
+            </div>
+          </div>
+          <div class="flex-c gap-16 text-xs text-muted" style="margin-top:18px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <span>Creator: <span style="color:var(--white)">Dr. A. Mutua</span></span>
+            <span>Filed: <span style="color:var(--white)">Jan 12, 2026</span></span>
+            <span>Region: <span style="color:var(--white)">Kenya / Global</span></span>
+            <span><svg class="icon icon-sm" style="vertical-align:middle"><use href="#i-eye"/></svg> 12 views</span>
+            <span><svg class="icon icon-sm" style="vertical-align:middle"><use href="#i-doc"/></svg> 5 NDAs signed</span>
+            <span>IOL: <span class="font-mono text-teal">Block #1,847,200</span></span>
+          </div>
+        </div>
+        <div class="fp-card">
+          <div class="fp-label"><svg class="icon icon-sm"><use href="#i-fp"/></svg>Cryptographic Proof of Ownership</div>
+          <div class="fp-hash">SHA-256: a4f2b8c1d9e3f047a2b8c1d9e3f047a2b8c1d9e3f047a4f2b8c1d9e3f047cc3</div>
+          <div class="fp-meta">
+            <div><div class="fp-meta-lbl">Timestamp</div><div class="fp-meta-val">2026-01-12T08:44:22Z</div></div>
+            <div><div class="fp-meta-lbl">RFC 3161 TSA</div><div class="fp-meta-val">DigiCert TS Authority</div></div>
+            <div><div class="fp-meta-lbl">Blockchain Tx</div><div class="fp-meta-val text-teal">0x3f9a...c21b</div></div>
+          </div>
+          <div class="verified-row"><svg class="icon icon-sm"><use href="#i-shield"/></svg>Verified on Hyperledger Fabric &middot; Court-Admissible Timestamp</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="font-d fw-600 mb-16" style="font-size:14px;">Controlled Idea Disclosure</div>
+            <div class="cid-layers">
+              <div class="layer-card is-open">
+                <div class="layer-header" onclick="this.closest('.layer-card').classList.toggle('is-open')">
+                  <div class="layer-num open">L1</div>
+                  <div class="layer-info"><div class="layer-name">Public Teaser</div><div class="layer-reqs"><span class="req-tag met"><svg class="icon icon-sm"><use href="#i-check"/></svg>Public</span></div></div>
+                  <span class="layer-badge open">Unlocked</span>
+                </div>
+                <div class="layer-body"><div class="content-box"><div class="watermark-txt">INNOVATION EXCHANGE &middot; IW &middot; 2026-03-13</div>Non-invasive wearable sensor continuously monitoring metabolic health in real-time. Targeting diabetes management, sports performance, and preventive healthcare globally. Market: $47B. Problem: 415M diabetics require painful blood glucose monitoring. Our solution eliminates this entirely.</div></div>
+              </div>
+              <div class="layer-card" id="layer-2-card">
+                <div class="layer-header" onclick="openModal('modal-nda')">
+                  <div class="layer-num open">L2</div>
+                  <div class="layer-info"><div class="layer-name">Market Concept</div><div class="layer-reqs"><span class="req-tag met"><svg class="icon icon-sm"><use href="#i-check"/></svg>Identity Verified</span><span class="req-tag"><svg class="icon icon-sm"><use href="#i-doc"/></svg>NDA Required</span></div></div>
+                  <span class="layer-badge nda">Sign NDA</span>
+                </div>
+                <div class="layer-body"><div class="locked-prompt"><svg class="icon-lg text-muted"><use href="#i-lock"/></svg><p>Sign a non-disclosure agreement to access market sizing, competitive analysis, and revenue model.</p><button class="btn btn-gold btn-sm" onclick="openModal('modal-nda')"><svg class="icon icon-sm"><use href="#i-doc"/></svg>Sign NDA &mdash; Free</button></div></div>
+              </div>
+              <div class="layer-card">
+                <div class="layer-header" onclick="openModal('modal-escrow')">
+                  <div class="layer-num locked">L3</div>
+                  <div class="layer-info"><div class="layer-name">Technical Concept</div><div class="layer-reqs"><span class="req-tag"><svg class="icon icon-sm"><use href="#i-shield"/></svg>KYC + Escrow $500</span><span class="req-tag">Accreditation</span></div></div>
+                  <span class="layer-badge escrow">Escrow Required</span>
+                </div>
+              </div>
+              <div class="layer-card">
+                <div class="layer-header">
+                  <div class="layer-num locked">L4</div>
+                  <div class="layer-info"><div class="layer-name">Implementation Details</div><div class="layer-reqs"><span class="req-tag">Background Check</span><span class="req-tag">Collaboration Agreement</span></div></div>
+                  <span class="layer-badge locked">Locked</span>
+                </div>
+              </div>
+              <div class="layer-card">
+                <div class="layer-header">
+                  <div class="layer-num gold-n">L5</div>
+                  <div class="layer-info"><div class="layer-name">Full Proprietary Concept</div><div class="layer-reqs"><span class="req-tag">Full Legal Agreement</span><span class="req-tag">Creator Approval</span></div></div>
+                  <span class="layer-badge locked"><svg class="icon icon-sm"><use href="#i-lock"/></svg>Proprietary</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="font-d fw-600 mb-16" style="font-size:14px;">AI Innovation Score</div>
+            <div class="panel mb-16">
+              <div class="panel-body">
+                <div class="flex-c gap-16 mb-16">
+                  <div style="position:relative;width:68px;height:68px;flex-shrink:0;">
+                    <svg width="68" height="68" style="transform:rotate(-90deg)"><circle cx="34" cy="34" r="28" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="5"/><circle cx="34" cy="34" r="28" fill="none" stroke="#00C9A7" stroke-width="5" stroke-dasharray="160 175.9" stroke-linecap="round"/></svg>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:18px;font-weight:700;color:var(--teal);">91</div>
+                  </div>
+                  <div><div class="fw-500 mb-4">Exceptional</div><div class="text-xs text-muted" style="line-height:1.6;">Top 4% in Health Tech. Patent clearance confirmed on 12 of 14 technical claims.</div></div>
+                </div>
+                <div class="score-breakdown">
+                  <div class="score-dim"><div class="score-dim-lbl">Novelty</div><div class="score-bar-track"><div class="score-bar-fill" style="width:96%"></div></div><div class="score-dim-val c-teal">96</div></div>
+                  <div class="score-dim"><div class="score-dim-lbl">Market Fit</div><div class="score-bar-track"><div class="score-bar-fill" style="width:88%;background:var(--gold)"></div></div><div class="score-dim-val c-gold">88</div></div>
+                  <div class="score-dim"><div class="score-dim-lbl">Feasibility</div><div class="score-bar-track"><div class="score-bar-fill" style="width:84%;background:var(--info)"></div></div><div class="score-dim-val c-info">84</div></div>
+                  <div class="score-dim"><div class="score-dim-lbl">Completeness</div><div class="score-bar-track"><div class="score-bar-fill" style="width:90%"></div></div><div class="score-dim-val c-teal">90</div></div>
+                  <div class="score-dim" style="grid-column:1/-1"><div class="score-dim-lbl">Patent Clearance</div><div class="score-bar-track"><div class="score-bar-fill" style="width:86%;background:var(--gold)"></div></div><div class="score-dim-val c-gold">86</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div class="panel-title">Similarity Detection</div><span class="text-xs" style="color:var(--success)">No conflicts</span></div>
+              <div class="panel-body text-sm text-muted" style="line-height:1.7;">Scanned against <span style="color:var(--white)">47,834</span> published ideas and <span style="color:var(--white)">3.2M</span> patent records.<br>Highest similarity: <span class="font-mono" style="color:var(--success)">0.61</span> &mdash; below 0.85 warning threshold.<br><span style="color:var(--success)">Original. Safe to publish.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="page" id="page-submit">
+        <div class="page-header"><div><div class="page-heading">Submit New Idea</div><div class="page-sub">Your idea will be SHA-256 fingerprinted and anchored to the Hyperledger Ownership Ledger on submission.</div></div></div>
+        <div style="max-width:740px;">
+          <div class="fp-card"><div class="fp-label"><svg class="icon icon-sm"><use href="#i-fp"/></svg>Auto-Fingerprinting Active</div><div class="text-sm text-muted" style="line-height:1.65;">Upon submission your idea receives a SHA-256 fingerprint with RFC 3161 timestamp &mdash; court-admissible proof of creation date. No patent filing required.</div></div>
+          <div class="form-group"><label class="form-label">Idea Title <span class="req">*</span><span class="hint">Be specific &mdash; not generic</span></label><input class="form-input" id="idea-title" placeholder="e.g., AI-Powered Real-Time Soil pH Sensor for Smallholder Farmers" oninput="updateFp()"></div>
+          <div class="form-group"><label class="form-label">Category <span class="req">*</span></label><select class="form-select" id="idea-cat"><option value="">Select a category</option><option>Health Tech</option><option>AI / ML</option><option>Clean Energy</option><option>Fintech</option><option>AgriTech</option><option>EdTech</option><option>Climate / Environment</option><option>Transportation</option><option>Other</option></select></div>
+          <div class="form-group"><label class="form-label">Asking Price (USD)<span class="hint">Leave blank for License Only</span></label><input class="form-input" id="idea-price" type="number" placeholder="e.g., 50000"></div>
+          <hr class="divider">
+          <div class="font-d fw-600 mb-16" style="font-size:14px;">CID Layer Content</div>
+          <div class="lb-item"><div class="lb-head"><div class="layer-num open" style="width:24px;height:24px;font-size:10px;">L1</div><span class="lb-tag lt-1">Public Teaser</span><span class="lb-cond">Visible to everyone</span></div><div class="lb-body"><textarea class="form-textarea" id="layer-1" placeholder="Describe the problem you are solving and your high-level value proposition. Do not reveal your secret sauce." oninput="updateFp()"></textarea></div></div>
+          <div class="lb-item"><div class="lb-head"><div class="layer-num open" style="width:24px;height:24px;font-size:10px;">L2</div><span class="lb-tag lt-2">Market Concept</span><span class="lb-cond">Unlocks after NDA signature</span></div><div class="lb-body"><textarea class="form-textarea" id="layer-2" placeholder="Market size, target customers, competitive landscape, business model, revenue projections..."></textarea></div></div>
+          <div class="lb-item"><div class="lb-head"><div class="layer-num locked" style="width:24px;height:24px;font-size:10px;">L3</div><span class="lb-tag lt-3">Technical Concept</span><span class="lb-cond">KYC + $500 escrow required</span></div><div class="lb-body"><textarea class="form-textarea" id="layer-3" placeholder="Technology approach, core innovation, key differentiators, technical feasibility evidence..."></textarea></div></div>
+          <div class="lb-item"><div class="lb-head"><div class="layer-num locked" style="width:24px;height:24px;font-size:10px;">L4</div><span class="lb-tag lt-4">Implementation Details</span><span class="lb-cond">Background check + agreement</span></div><div class="lb-body"><textarea class="form-textarea" id="layer-4" placeholder="Architecture, process specifics, team requirements, timeline..."></textarea></div></div>
+          <div class="lb-item"><div class="lb-head"><div class="layer-num gold-n" style="width:24px;height:24px;font-size:10px;">L5</div><span class="lb-tag lt-5">Full Proprietary Concept</span><span class="lb-cond">Your explicit approval only</span></div><div class="lb-body"><textarea class="form-textarea" id="layer-5" placeholder="Complete IP: formulas, source code, trade secrets, prototypes, patent claims..."></textarea></div></div>
+          <hr class="divider">
+          <div class="fp-card" id="fp-preview"><div class="fp-label"><svg class="icon icon-sm"><use href="#i-fp"/></svg>Fingerprint Preview</div><div class="fp-hash" id="fp-hash" style="color:var(--muted)">Start typing to generate fingerprint preview...</div><div class="text-xs text-muted" style="margin-top:8px;">This hash will be anchored to Hyperledger Fabric and timestamped via RFC 3161 immediately on submission.</div></div>
+          <div class="flex gap-10"><button class="btn btn-primary" style="flex:1" onclick="submitIdea()"><svg class="icon icon-sm"><use href="#i-plus"/></svg>Submit and Fingerprint Idea</button><button class="btn btn-ghost" onclick="navigate('dashboard')">Cancel</button></div>
+        </div>
+      </div>
+
+      <!-- MY PORTFOLIO -->
+      <div class="page" id="page-my-ideas">
+        <div class="page-header"><div><div class="page-heading">My Portfolio</div><div class="page-sub">7 ideas across all stages. Combined estimated valuation: $284,000.</div></div><button class="btn btn-primary" onclick="navigate('submit')"><svg class="icon icon-sm"><use href="#i-plus"/></svg>New Idea</button></div>
+        <div class="panel"><div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Idea</th><th>Category</th><th>Score</th><th>Status</th><th>Views</th><th>NDAs</th><th>Valuation</th><th></th></tr></thead><tbody>
+          <tr onclick="openDetail()"><td><span style="color:var(--white);font-weight:500">BioSense Array</span></td><td><div class="cat-tag teal" style="display:inline-flex"><svg class="icon icon-sm"><use href="#cat-health"/></svg>Health</div></td><td><span class="font-mono text-teal">91</span></td><td><span class="badge pending">Under Offer</span></td><td>12</td><td>5</td><td class="c-gold fw-500">$120K</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><span style="color:var(--white);font-weight:500">Smart Grid Protocol</span></td><td><div class="cat-tag gold" style="display:inline-flex"><svg class="icon icon-sm"><use href="#cat-energy"/></svg>Energy</div></td><td><span class="font-mono text-teal">87</span></td><td><span class="badge verified">Published</span></td><td>8</td><td>3</td><td class="c-gold fw-500">$84K</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><span style="color:var(--white);font-weight:500">Carbon Protocol</span></td><td><div class="cat-tag gold" style="display:inline-flex"><svg class="icon icon-sm"><use href="#cat-energy"/></svg>Climate</div></td><td><span class="font-mono text-teal">83</span></td><td><span class="badge verified">Published</span></td><td>5</td><td>2</td><td class="c-gold fw-500">$45K</td><td><button class="btn btn-ghost btn-sm">View</button></td></tr>
+          <tr><td><span style="color:var(--white);font-weight:500">AI Triage System</span></td><td><div class="cat-tag teal" style="display:inline-flex"><svg class="icon icon-sm"><use href="#cat-health"/></svg>Health</div></td><td><span class="font-mono text-teal">78</span></td><td><span class="badge pending">Draft</span></td><td>0</td><td>0</td><td class="text-muted">&mdash;</td><td><button class="btn btn-primary btn-sm" onclick="navigate('submit')">Publish</button></td></tr>
+        </tbody></table></div></div>
+      </div>
+
+      <!-- LEDGER -->
+      <div class="page" id="page-ledger">
+        <div class="page-header"><div><div class="page-heading">Idea Ownership Ledger</div><div class="page-sub">Immutable, tamper-proof history of all your IP anchored to Hyperledger Fabric.</div></div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-check"/></svg>7 ideas synced</span></div>
+        <div class="grid-3-1">
+          <div>
+            <div class="text-xs text-muted fw-500 mb-16" style="text-transform:uppercase;letter-spacing:0.8px;">BIOSENSE ARRAY</div>
+            <div class="ledger-line">
+              <div class="ledger-event"><div class="ledger-dot teal"></div><div class="ledger-card"><div class="ledger-lbl teal">Idea Created</div><div class="ledger-desc">BioSense Array registered to Dr. A. Mutua</div><div class="ledger-time">Jan 12, 2026 &middot; 08:44 UTC</div><div class="ledger-hash">SHA-256: a4f2b8c1...cc3 &middot; Block #1,847,200</div><div class="verified-row text-xs"><svg class="icon icon-sm"><use href="#i-shield"/></svg>RFC 3161 &middot; DigiCert TSA</div></div></div>
+              <div class="ledger-event"><div class="ledger-dot info"></div><div class="ledger-card"><div class="ledger-lbl info">Layer Disclosure</div><div class="ledger-desc">Layer 2 unlocked by <span style="color:var(--info)">Nexus Capital</span></div><div class="ledger-time">Feb 3, 2026 &middot; NDA #ENV-7712 signed</div><div class="ledger-hash">Viewer token: wm_8f3a...b291 &middot; IP hash: 41.x.x.x</div></div></div>
+              <div class="ledger-event"><div class="ledger-dot gold"></div><div class="ledger-card"><div class="ledger-lbl gold">Licensing Offer Received</div><div class="ledger-desc">Offer: <span class="c-gold">$45,000</span> + 5% royalty &mdash; Meditec Holdings</div><div class="ledger-time">Mar 1, 2026</div><div class="flex gap-8" style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="toast('Offer accepted. Proceeding to legal agreement.','success')">Accept Offer</button><button class="btn btn-ghost btn-sm">Counter</button></div></div></div>
+              <div class="ledger-event"><div class="ledger-dot info"></div><div class="ledger-card"><div class="ledger-lbl info">Layer Disclosure</div><div class="ledger-desc">Layer 3 unlocked by <span style="color:var(--info)">Priya Menon</span></div><div class="ledger-time">Mar 10, 2026 &middot; $500 escrow deposited</div><div class="ledger-hash">Viewer token: wm_2c8d...a441</div></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="panel"><div class="panel-header"><div class="panel-title">Ledger Stats</div></div><div class="panel-body" style="display:flex;flex-direction:column;gap:13px;"><div class="flex-b text-sm"><span class="text-muted">Total IOL Entries</span><span class="font-mono text-teal">38</span></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span class="text-muted">Active NDAs</span><span class="font-mono c-gold">11</span></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span class="text-muted">Escrow Held</span><span class="font-mono c-info">$2,500</span></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span class="text-muted">Last Sync</span><span class="text-xs" style="color:var(--success)">2 min ago</span></div></div></div>
+            <div class="panel"><div class="panel-header"><div class="panel-title">Watermark Registry</div><svg class="icon icon-sm text-muted"><use href="#i-drop"/></svg></div><div class="panel-body"><div class="text-xs text-muted mb-12" style="line-height:1.6;">Unique tokens per viewing session. Enables leak tracing.</div><div style="display:flex;flex-direction:column;gap:7px;"><div class="ledger-hash">wm_8f3a...b291 &rarr; Nexus Capital &middot; Feb 3</div><div class="ledger-hash">wm_2c8d...a441 &rarr; Priya Menon &middot; Mar 10</div><div class="ledger-hash" style="color:var(--muted)">wm_9e1f...c882 &rarr; [Redacted] &middot; Mar 12</div></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTORS -->
+      <div class="page" id="page-investors">
+        <div class="page-header"><div><div class="page-heading">Investor Discovery</div><div class="page-sub">AI-matched investors based on your idea portfolio. All accreditation-verified.</div></div></div>
+        <div class="ideas-grid">
+          <div class="idea-card"><div class="flex-c gap-12 mb-16"><div class="user-avatar" style="width:42px;height:42px;font-size:14px;">NC</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Nexus Capital</div><div class="text-xs text-muted">Series A &middot; Health &amp; AI</div></div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-shield"/></svg>Accredited</span></div><div class="idea-teaser">Invests $500K &ndash; $5M in early-stage health tech and AI diagnostics. 3 exits. Actively seeking biosensor innovations.</div><div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-dollar"/></svg>$2M avg</div><div class="meta-price" style="color:var(--teal)">94% match</div><button class="btn btn-primary btn-sm" onclick="toast('Connection request sent to Nexus Capital','success')">Connect</button></div></div>
+          <div class="idea-card"><div class="flex-c gap-12 mb-16"><div class="user-avatar" style="width:42px;height:42px;font-size:14px;background:linear-gradient(135deg,var(--gold-dim),var(--navy-light))">MH</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Meditec Holdings</div><div class="text-xs text-muted">Strategic Buyer &middot; MedTech</div></div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-shield"/></svg>Corporate</span></div><div class="idea-teaser">Global medical device company seeking IP acquisitions in non-invasive diagnostics, point-of-care devices, and wearable health.</div><div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-dollar"/></svg>Acquisition</div><div class="meta-price" style="color:var(--teal)">89% match</div><button class="btn btn-primary btn-sm" onclick="toast('Connection request sent to Meditec Holdings','success')">Connect</button></div></div>
+          <div class="idea-card"><div class="flex-c gap-12 mb-16"><div class="user-avatar" style="width:42px;height:42px;font-size:14px;background:linear-gradient(135deg,var(--info),var(--navy-light))">GV</div><div style="flex:1"><div style="font-size:13.5px;font-weight:600">Green Ventures Africa</div><div class="text-xs text-muted">Impact VC &middot; Clean Energy</div></div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-shield"/></svg>Accredited</span></div><div class="idea-teaser">Kenya-based impact fund investing in clean energy and agritech across Sub-Saharan Africa. $50K &ndash; $500K checks.</div><div class="idea-meta"><div class="meta-item"><svg class="icon icon-sm"><use href="#i-dollar"/></svg>$200K avg</div><div class="meta-price" style="color:var(--teal)">81% match</div><button class="btn btn-primary btn-sm" onclick="toast('Connection request sent to Green Ventures Africa','success')">Connect</button></div></div>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="page" id="page-messages">
+        <div class="page-header"><div><div class="page-heading">Secure Messages</div><div class="page-sub">End-to-end encrypted via Signal Protocol. The platform cannot read these messages.</div></div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-lock"/></svg>E2E Encrypted</span></div>
+        <div class="grid-2">
+          <div class="panel"><div class="panel-header"><div class="panel-title">Conversations</div></div>
+            <div>
+              <div class="activity-item" style="padding:13px 18px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--teal-ghost);border-left:2px solid var(--teal)"><div class="user-avatar" style="width:36px;height:36px;font-size:11px;">NC</div><div class="activity-text"><div style="font-size:13px;font-weight:500;color:var(--white)">Nexus Capital</div><div class="text-xs" style="color:var(--teal)">3 new messages</div></div></div>
+              <div class="activity-item" style="padding:13px 18px;cursor:pointer;border-bottom:1px solid var(--border)"><div class="user-avatar" style="width:36px;height:36px;font-size:11px;background:linear-gradient(135deg,var(--gold-dim),var(--navy-light))">PM</div><div class="activity-text"><div style="font-size:13px;font-weight:500;color:var(--white)">Priya Menon</div><div class="text-xs text-muted">Smart Grid licensing terms?</div></div></div>
+              <div class="activity-item" style="padding:13px 18px;cursor:pointer;border-bottom:none"><div class="user-avatar" style="width:36px;height:36px;font-size:11px;background:linear-gradient(135deg,var(--info),var(--navy-light))">MT</div><div class="activity-text"><div style="font-size:13px;font-weight:500;color:var(--white)">Meditec Holdings</div><div class="text-xs text-muted">Formal offer attached...</div></div></div>
+            </div>
+          </div>
+          <div class="panel" style="display:flex;flex-direction:column;">
+            <div class="panel-header"><div class="flex-c gap-10"><div class="user-avatar" style="width:30px;height:30px;font-size:10px;">NC</div><div><div class="panel-title" style="margin:0">Nexus Capital</div><div class="text-xs text-teal">Online &middot; E2E Encrypted</div></div></div></div>
+            <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:240px;overflow-y:auto" id="msg-body">
+              <div class="msg-in"><div class="user-avatar" style="width:26px;height:26px;font-size:9px;flex-shrink:0;margin-top:2px;">NC</div><div class="bubble in">Hi, we reviewed Layer 1 of BioSense. The problem statement is compelling. We would like to access Layer 3 after signing NDA.</div></div>
+              <div class="msg-out"><div class="bubble out">Layer 2 is NDA-gated and free. Layer 3 requires $500 escrow and accreditation verification. Please complete KYC first.</div></div>
+              <div class="msg-in"><div class="user-avatar" style="width:26px;height:26px;font-size:9px;flex-shrink:0;margin-top:2px;">NC</div><div class="bubble in">Understood. We have completed KYC and signed the NDA. Can you grant Layer 3 access? We are prepared to deposit escrow today.</div></div>
+            </div>
+            <div style="padding:12px;border-top:1px solid var(--border);display:flex;gap:9px">
+              <input class="form-input" id="msg-input" placeholder="Type a secure message..." style="flex:1" onkeydown="if(event.key==='Enter')sendMsg()">
+              <button class="btn btn-primary btn-sm" onclick="sendMsg()"><svg class="icon icon-sm"><use href="#i-send"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="page" id="page-profile">
+        <div class="page-header"><div><div class="page-heading">Profile &amp; KYC</div><div class="page-sub">Complete verification to unlock all platform features.</div></div></div>
+        <div class="grid-2">
+          <div>
+            <div class="panel mb-16">
+              <div class="panel-header"><div class="panel-title">Identity Verification</div><span class="badge verified"><svg class="icon icon-sm"><use href="#i-check"/></svg>Verified</span></div>
+              <div class="panel-body">
+                <div class="flex-c gap-14 mb-20"><div class="user-avatar" style="width:52px;height:52px;font-size:18px;">IW</div><div><div style="font-size:15px;font-weight:500">Idea Wizard</div><div class="text-sm text-muted">idea.wizard@example.com</div><div class="flex gap-8" style="margin-top:6px"><span class="badge verified">KYC Verified</span><span class="badge pro">Pro Innovator</span></div></div></div>
+                <div class="text-xs text-muted mb-8" style="text-transform:uppercase;letter-spacing:0.5px;">Verification Progress</div>
+                <div class="kyc-bar"><div class="kyc-step done"></div><div class="kyc-step done"></div><div class="kyc-step done"></div><div class="kyc-step done"></div><div class="kyc-step"></div></div>
+                <div class="text-xs text-muted mb-16">4 of 5 complete &middot; Accredited Investor verification pending</div>
+                <div style="display:flex;flex-direction:column;gap:9px;">
+                  <div class="flex-b" style="padding:9px 13px;background:rgba(61,201,122,0.05);border:1px solid rgba(61,201,122,0.15);border-radius:var(--r-m)"><span class="text-sm">Email Verification</span><span class="text-xs" style="color:var(--success)">Verified</span></div>
+                  <div class="flex-b" style="padding:9px 13px;background:rgba(61,201,122,0.05);border:1px solid rgba(61,201,122,0.15);border-radius:var(--r-m)"><span class="text-sm">Government ID (Jumio)</span><span class="text-xs" style="color:var(--success)">#KYC-4492</span></div>
+                  <div class="flex-b" style="padding:9px 13px;background:rgba(61,201,122,0.05);border:1px solid rgba(61,201,122,0.15);border-radius:var(--r-m)"><span class="text-sm">Biometric Check</span><span class="text-xs" style="color:var(--success)">Passed</span></div>
+                  <div class="flex-b" style="padding:9px 13px;background:rgba(61,201,122,0.05);border:1px solid rgba(61,201,122,0.15);border-radius:var(--r-m)"><span class="text-sm">MFA (TOTP)</span><span class="text-xs" style="color:var(--success)">Enabled</span></div>
+                  <div class="flex-b" style="padding:9px 13px;background:var(--gold-ghost);border:1px solid var(--gold-border);border-radius:var(--r-m)"><span class="text-sm">Accredited Investor</span><button class="btn btn-gold btn-sm" onclick="toast('Accreditation process started.','info')">Verify Now</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel mb-16">
+              <div class="panel-header"><div class="panel-title">Reputation Score</div></div>
+              <div class="panel-body">
+                <div class="flex-c gap-16 mb-14"><div class="font-d c-teal" style="font-size:40px;font-weight:700">94</div><div><div class="fw-500 mb-4">Excellent Standing</div><div class="text-xs text-muted" style="line-height:1.6">Top 8% of all innovators. No disputes, no flags.</div></div></div>
+                <div class="score-bar-track" style="height:5px;margin-bottom:7px"><div class="score-bar-fill" style="width:94%"></div></div>
+                <div class="flex-b text-xs text-muted"><span>0 &middot; New</span><span>50 &middot; Trusted</span><span>100 &middot; Elite</span></div>
+              </div>
+            </div>
+            <div class="panel"><div class="panel-header"><div class="panel-title">Subscription</div></div><div class="panel-body"><div style="background:linear-gradient(135deg,var(--teal-ghost),var(--gold-ghost));border:1px solid var(--teal-border);border-radius:var(--r-m);padding:15px;margin-bottom:13px"><div class="font-d fw-600 mb-4">Pro Innovator</div><div class="text-xs text-muted mb-12">$29/month &middot; Renews April 13, 2026</div><div class="text-xs text-mid" style="line-height:1.9">10 active ideas &middot; AI scoring &middot; IOL anchoring &middot; Encrypted messaging</div></div><button class="btn btn-ghost btn-full" onclick="toast('Upgrade page coming soon.','info')">Upgrade to Studio &mdash; $99/mo</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><div class="page-heading">Settings</div></div>
+        <div style="max-width:620px;">
+          <div class="panel mb-16"><div class="panel-header"><div class="panel-title">Security</div></div><div class="panel-body" style="display:flex;flex-direction:column;gap:16px;"><div class="flex-b"><div><div class="fw-500 text-sm">Two-Factor Authentication</div><div class="text-xs text-muted">TOTP via Authenticator App</div></div><span class="text-xs" style="color:var(--success)">Enabled</span></div><div class="flex-b" style="padding-top:14px;border-top:1px solid var(--border)"><div><div class="fw-500 text-sm">Active Sessions</div><div class="text-xs text-muted">2 devices signed in</div></div><button class="btn btn-ghost btn-sm" onclick="toast('All other sessions terminated','warning')">Revoke Others</button></div><div class="flex-b" style="padding-top:14px;border-top:1px solid var(--border)"><div><div class="fw-500 text-sm">Screenshot Detection</div><div class="text-xs text-muted">Attempts logged in disclosure events</div></div><span class="text-xs" style="color:var(--success)">Active</span></div></div></div>
+          <div class="panel"><div class="panel-header"><div class="panel-title">Notifications</div></div><div class="panel-body" style="display:flex;flex-direction:column;gap:14px;"><div class="flex-b text-sm"><span>Layer unlock events</span><input type="checkbox" checked style="accent-color:var(--teal);width:15px;height:15px"></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span>New NDA signatures</span><input type="checkbox" checked style="accent-color:var(--teal);width:15px;height:15px"></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span>Investor connections</span><input type="checkbox" checked style="accent-color:var(--teal);width:15px;height:15px"></div><div class="flex-b text-sm" style="padding-top:12px;border-top:1px solid var(--border)"><span>Offer received</span><input type="checkbox" checked style="accent-color:var(--teal);width:15px;height:15px"></div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- NDA MODAL -->
+<div class="modal-bg" id="modal-nda">
+  <div class="modal-box">
+    <div class="modal-x" onclick="closeModal('modal-nda')"><svg class="icon icon-sm"><use href="#i-x"/></svg></div>
+    <div class="modal-title">Sign NDA &mdash; Layer 2 Access</div>
+    <div class="modal-sub">You are requesting access to the Market Concept layer of BioSense Array. A non-disclosure agreement is required.</div>
+    <div class="nda-box">
+      <div class="nda-box-lbl"><svg class="icon icon-sm"><use href="#i-doc"/></svg>Non-Disclosure Agreement</div>
+      <div class="nda-text">This NDA prohibits disclosure of any information received in Layer 2 and above to any third party without written consent from the idea creator. Violation constitutes breach of contract. This agreement is legally binding and executed via DocuSign.</div>
+      <div class="nda-check-row"><div class="checkbox" id="nda-cb" onclick="toggleNda()"></div><div class="text-xs text-mid">I agree to the NDA terms and understand this agreement is legally binding</div></div>
+    </div>
+    <div class="text-xs text-muted mb-16">This signature event will be permanently recorded in the Idea Ownership Ledger with your identity hash and timestamp.</div>
+    <button class="btn btn-gold btn-full" id="nda-btn" onclick="signNda()" disabled style="opacity:0.45"><svg class="icon icon-sm"><use href="#i-doc"/></svg>Sign via DocuSign &mdash; Access Layer 2</button>
+  </div>
+</div>
+
+<!-- ESCROW MODAL -->
+<div class="modal-bg" id="modal-escrow">
+  <div class="modal-box">
+    <div class="modal-x" onclick="closeModal('modal-escrow')"><svg class="icon icon-sm"><use href="#i-x"/></svg></div>
+    <div class="modal-title">Escrow Deposit &mdash; Layer 3 Access</div>
+    <div class="modal-sub">Layer 3 requires a refundable escrow deposit held until a transaction is completed or the process exits.</div>
+    <div class="escrow-row"><div><div class="text-xs text-muted" style="margin-bottom:2px">Deposit Amount</div><div class="escrow-amt">$500</div></div><div><div class="text-xs text-muted" style="margin-bottom:3px">Held By</div><div class="text-sm" style="color:var(--white);margin-bottom:3px">Escrow.com</div><div class="text-xs text-muted">100% refundable if no deal within 30 days.</div></div></div>
+    <div class="form-group"><label class="form-label">Card Number</label><input class="form-input" placeholder="4242 4242 4242 4242"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px"><div class="form-group" style="margin:0"><label class="form-label">Expiry</label><input class="form-input" placeholder="MM / YY"></div><div class="form-group" style="margin:0"><label class="form-label">CVC</label><input class="form-input" placeholder="&bull;&bull;&bull;"></div></div>
+    <button class="btn btn-primary btn-full" onclick="depositEscrow()"><svg class="icon icon-sm"><use href="#i-dollar"/></svg>Deposit $500 &mdash; Access Layer 3</button>
+    <div class="text-xs text-muted" style="text-align:center;margin-top:9px">Secured by Stripe &middot; Escrow.com &middot; 256-bit encryption</div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+const TITLES = {dashboard:'Dashboard',marketplace:'Marketplace',submit:'Submit Idea','my-ideas':'My Portfolio',ledger:'Ownership Ledger',investors:'Investor Discovery',messages:'Secure Messages',profile:'Profile & KYC',settings:'Settings',detail:'BioSense Array'};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + page);
+  if (pg) pg.classList.add('active');
+  const nv = document.querySelector('[data-page="'+page+'"]');
+  if (nv) nv.classList.add('active');
+  document.getElementById('topbar-title').textContent = TITLES[page] || page;
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(el => el.addEventListener('click', () => navigate(el.dataset.page)));
+
+function openDetail() { navigate('detail'); }
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+function toggleNda() {
+  const cb = document.getElementById('nda-cb');
+  const btn = document.getElementById('nda-btn');
+  cb.classList.toggle('checked');
+  if (cb.classList.contains('checked')) {
+    cb.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0D1B2A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    btn.disabled = false; btn.style.opacity = '1';
+  } else {
+    cb.innerHTML = ''; btn.disabled = true; btn.style.opacity = '0.45';
+  }
+}
+
+function signNda() {
+  closeModal('modal-nda');
+  toast('NDA signed. Layer 2 access granted.', 'success');
+  setTimeout(() => {
+    const card = document.getElementById('layer-2-card');
+    if (card) {
+      card.querySelector('.layer-num').className = 'layer-num open';
+      card.querySelector('.layer-badge').className = 'layer-badge open';
+      card.querySelector('.layer-badge').textContent = 'Unlocked';
+      card.classList.add('is-open');
+      card.querySelector('.layer-body').innerHTML = '<div class="content-box"><div class="watermark-txt">INNOVATION EXCHANGE &middot; IW &middot; 2026-03-13</div><strong style="color:var(--teal);font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px">Market Analysis &mdash; Confidential &mdash; NDA Protected</strong><br><br>Total Addressable Market: $47B globally. Serviceable: $8.2B. No competitor monitors 14 metabolic markers non-invasively. Revenue: Device hardware ($299) + $29/month SaaS. B2B hospital licensing at $15K/ward/year. Projected Year 3 revenue: $42M at 0.1% TAM penetration.</div>';
+    }
+    toast('Disclosure event recorded in Ownership Ledger.', 'info');
+  }, 900);
+}
+
+function depositEscrow() {
+  closeModal('modal-escrow');
+  toast('$500 escrow deposited. Accreditation check initiated.', 'success');
+  setTimeout(() => toast('Verification sent. Allow 24-48 hours.', 'info'), 2000);
+}
+
+function pseudoHash(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) + h) ^ s.charCodeAt(i); h = h >>> 0; }
+  return h.toString(16).padStart(8,'0');
+}
+function updateFp() {
+  const t = document.getElementById('idea-title')?.value || '';
+  const l = document.getElementById('layer-1')?.value || '';
+  const combined = t + '|' + l;
+  const el = document.getElementById('fp-hash');
+  if (!el) return;
+  if (!combined.trim() || combined === '|') { el.textContent = 'Start typing to generate fingerprint preview...'; el.style.color = 'var(--muted)'; return; }
+  let out = '';
+  for (let i = 0; i < 8; i++) out += pseudoHash(combined + i);
+  el.textContent = 'SHA-256: ' + out;
+  el.style.color = 'var(--teal)';
+}
+
+function submitIdea() {
+  const title = document.getElementById('idea-title')?.value?.trim();
+  const cat = document.getElementById('idea-cat')?.value;
+  const l1 = document.getElementById('layer-1')?.value?.trim();
+  if (!title) { toast('Idea title is required.', 'error'); return; }
+  if (!cat) { toast('Please select a category.', 'error'); return; }
+  if (!l1) { toast('Layer 1 (Public Teaser) is required.', 'error'); return; }
+  toast('Generating cryptographic fingerprint...', 'info');
+  setTimeout(() => { toast('Anchoring to Hyperledger Fabric...', 'info'); setTimeout(() => { toast('Idea submitted and fingerprinted.', 'success'); navigate('my-ideas'); }, 1300); }, 1100);
+}
+
+function sendMsg() {
+  const input = document.getElementById('msg-input');
+  const body = document.getElementById('msg-body');
+  const text = input.value.trim();
+  if (!text) return;
+  const out = document.createElement('div');
+  out.className = 'msg-out';
+  out.innerHTML = '<div class="bubble out">' + text + '</div>';
+  body.appendChild(out);
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+  setTimeout(() => {
+    const inn = document.createElement('div');
+    inn.className = 'msg-in';
+    inn.innerHTML = '<div class="user-avatar" style="width:26px;height:26px;font-size:9px;flex-shrink:0;margin-top:2px">NC</div><div class="bubble in">Thank you. We will review and respond within 24 hours.</div>';
+    body.appendChild(inn);
+    body.scrollTop = body.scrollHeight;
+  }, 1200);
+}
+
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => { c.closest('.filter-bar').querySelectorAll('.chip').forEach(x => x.classList.remove('active')); c.classList.add('active'); }));
+
+document.getElementById('global-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.value.trim()) { navigate('marketplace'); toast('Searching: ' + e.target.value, 'info'); e.target.value = ''; }
+});
+
+const TOAST_ICONS = { success:'#i-check', error:'#i-x', warning:'#i-shield', info:'#i-fp' };
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = '<svg class="icon icon-sm"><use href="' + TOAST_ICONS[type] + '"/></svg>' + msg;
+  document.getElementById('toast-wrap').appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(14px)'; t.style.transition = 'all 0.25s'; setTimeout(() => t.remove(), 260); }, 3400);
+}
+</script>
+</body>
+</html>
