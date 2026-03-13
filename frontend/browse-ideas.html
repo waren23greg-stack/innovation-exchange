@@ -1,0 +1,22 @@
+<h2>Browse Ideas</h2>
+<div id="ideasList"></div>
+
+<script>
+(async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://localhost:5000/api/ideas/browse', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    const ideasList = document.getElementById('ideasList');
+    data.ideas.forEach(idea => {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <h3>${idea.title}</h3>
+            <p>Accessible Layers: ${idea.accessible_layers}</p>
+            <a href="view-idea.html?id=${idea.id}">View Layers</a>
+        `;
+        ideasList.appendChild(div);
+    });
+})();
+</script>
