@@ -7,6 +7,7 @@ const {
   getIdeaById,
   transferIdeaOwnership,
 } = require('../models/ideaModel');
+const { unlockLayer } = require('../services/cidUnlockService');
 
 const router = express.Router();
 
@@ -59,10 +60,37 @@ router.post('/:id/layers', protect, async (req, res) => {
       content,
       unlock_conditions
     );
-    res.status(201).json({ message: 'Layer added', layer });
+    res.status(201).json({ message: 'Layer added and encrypted', layer });
   } catch (err) {
     console.error('[POST /ideas/:id/layers]', err.message);
     res.status(500).json({ error: 'Failed to add layer' });
+  }
+});
+
+router.post('/:id/layers/:layerNumber/unlock', protect, async (req, res) => {
+  try {
+    const { nda_envelope_id } = req.body;
+    const viewerIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const result = await unlockLayer({
+      ideaId:        req.params.id,
+      layerNumber:   parseInt(req.params.layerNumber),
+      userId:        req.user.id,
+      viewerIp,
+      ndaEnvelopeId: nda_envelope_id,
+    });
+    if (!result.success) {
+      return res.status(result.code || 403).json({
+        error:  result.error,
+        action: result.action,
+        ...(result.nda_template_url && { nda_template_url: result.nda_template_url }),
+        ...(result.payment_url      && { payment_url: result.payment_url }),
+        ...(result.amount_usd       && { amount_usd: result.amount_usd }),
+      });
+    }
+    res.json({ message: 'Layer unlocked', layer: result.layer });
+  } catch (err) {
+    console.error('[unlock]', err.message);
+    res.status(500).json({ error: 'Unlock failed' });
   }
 });
 
