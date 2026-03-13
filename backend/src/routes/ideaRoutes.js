@@ -10,6 +10,8 @@ const {
   getIdeaFingerprint,
 } = require('../models/ideaModel');
 const { unlockLayer } = require('../services/cidUnlockService');
+const { sendNDAForSigning, checkEnvelopeStatus } = require('../services/ndaService');
+const pool = require('../config/db');
 
 const router = express.Router();
 
@@ -84,11 +86,7 @@ router.post('/:id/layers', protect, async (req, res) => {
       return res.status(400).json({ error: 'layer_number and layer_name are required' });
     }
     const layer = await addIdeaLayer(
-      req.params.id,
-      layer_number,
-      layer_name,
-      content,
-      unlock_conditions
+      req.params.id, layer_number, layer_name, content, unlock_conditions
     );
     res.status(201).json({ message: 'Layer added and encrypted', layer });
   } catch (err) {
@@ -124,6 +122,54 @@ router.post('/:id/layers/:layerNumber/unlock', protect, async (req, res) => {
   }
 });
 
+// ─── POST /api/ideas/:id/nda — send NDA to viewer ────────────────────────────
+router.post('/:id/nda', protect, async (req, res) => {
+  try {
+    const { viewer_email, viewer_name } = req.body;
+    if (!viewer_email || !viewer_name) {
+      return res.status(400).json({ error: 'viewer_email and viewer_name are required' });
+    }
+
+    // Get idea details
+    const { rows } = await pool.query(
+      `SELECT i.title, u.username AS creator_name
+       FROM ideas i JOIN users u ON u.id = i.creator_id
+       WHERE i.id = $1`,
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Idea not found' });
+
+    const result = await sendNDAForSigning({
+      ideaId:      req.params.id,
+      ideaTitle:   rows[0].title,
+      creatorName: rows[0].creator_name,
+      viewerName:  viewer_name,
+      viewerEmail: viewer_email,
+    });
+
+    res.json({
+      message:     'NDA sent for signing',
+      envelope_id: result.envelopeId,
+      status:      result.status,
+      stub:        result.stub || false,
+    });
+  } catch (err) {
+    console.error('[POST /ideas/:id/nda]', err.message);
+    res.status(500).json({ error: 'Failed to send NDA' });
+  }
+});
+
+// ─── GET /api/ideas/:id/nda/:envelopeId — check NDA signing status ────────────
+router.get('/:id/nda/:envelopeId', protect, async (req, res) => {
+  try {
+    const status = await checkEnvelopeStatus(req.params.envelopeId);
+    res.json({ envelope_id: req.params.envelopeId, ...status });
+  } catch (err) {
+    console.error('[GET /ideas/:id/nda/:envelopeId]', err.message);
+    res.status(500).json({ error: 'Failed to check NDA status' });
+  }
+});
+
 router.post('/:id/transfer', protect, async (req, res) => {
   try {
     const { to_user_id, transfer_type, price_usd } = req.body;
@@ -131,11 +177,7 @@ router.post('/:id/transfer', protect, async (req, res) => {
       return res.status(400).json({ error: 'to_user_id and transfer_type are required' });
     }
     const result = await transferIdeaOwnership(
-      req.params.id,
-      req.user.id,
-      to_user_id,
-      transfer_type,
-      price_usd
+      req.params.id, req.user.id, to_user_id, transfer_type, price_usd
     );
     res.json({ message: 'Ownership transferred', result });
   } catch (err) {
