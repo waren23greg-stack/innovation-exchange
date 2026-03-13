@@ -6,6 +6,8 @@ const {
   getAllPublishedIdeas,
   getIdeaById,
   transferIdeaOwnership,
+  publishIdea,
+  getIdeaFingerprint,
 } = require('../models/ideaModel');
 const { unlockLayer } = require('../services/cidUnlockService');
 
@@ -32,6 +34,17 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
+router.get('/:id/certificate', protect, async (req, res) => {
+  try {
+    const cert = await getIdeaFingerprint(req.params.id, req.user.id);
+    if (!cert) return res.status(404).json({ error: 'Idea not found' });
+    res.json({ certificate: cert });
+  } catch (err) {
+    console.error('[GET /ideas/:id/certificate]', err.message);
+    res.status(500).json({ error: 'Failed to fetch certificate' });
+  }
+});
+
 router.post('/', protect, async (req, res) => {
   try {
     const { title, category, asking_price_usd } = req.body;
@@ -44,6 +57,23 @@ router.post('/', protect, async (req, res) => {
       return res.status(409).json({ error: err.message });
     }
     res.status(500).json({ error: 'Failed to create idea' });
+  }
+});
+
+router.post('/:id/publish', protect, async (req, res) => {
+  try {
+    const idea = await publishIdea(req.params.id, req.user.id);
+    if (!idea) return res.status(404).json({ error: 'Idea not found' });
+    res.json({ message: 'Idea published', idea });
+  } catch (err) {
+    console.error('[POST /ideas/:id/publish]', err.message);
+    if (err.message.includes('Only the creator')) {
+      return res.status(403).json({ error: err.message });
+    }
+    if (err.message.includes('at least one layer')) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Failed to publish idea' });
   }
 });
 
