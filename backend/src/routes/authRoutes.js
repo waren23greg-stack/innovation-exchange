@@ -24,7 +24,8 @@ router.post('/register', async (req, res) => {
   if (password.length < 8)
     return res.status(400).json({ error: 'Password must be at least 8 characters.' });
   try {
-    if (await getUserByEmail(email))
+    const existing = await getUserByEmail(email);
+    if (existing)
       return res.status(409).json({ error: 'An account with this email already exists.' });
     const user = await createUser(username, email, password);
     res.status(201).json({
@@ -33,8 +34,8 @@ router.post('/register', async (req, res) => {
       refreshToken: signRefresh(user),
     });
   } catch (err) {
-    console.error('[auth/register]', err.message);
-    res.status(500).json({ error: 'Registration failed.' });
+    console.error('[auth/register] FULL ERROR:', err);
+    res.status(500).json({ error: 'Registration failed.', detail: err.message });
   }
 });
 
@@ -55,8 +56,8 @@ router.post('/login', async (req, res) => {
       refreshToken: signRefresh(user),
     });
   } catch (err) {
-    console.error('[auth/login]', err.message);
-    res.status(500).json({ error: 'Login failed.' });
+    console.error('[auth/login] FULL ERROR:', err);
+    res.status(500).json({ error: 'Login failed.', detail: err.message });
   }
 });
 
