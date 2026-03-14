@@ -11,6 +11,7 @@ const {
 } = require('../models/ideaModel');
 const { unlockLayer } = require('../services/cidUnlockService');
 const { sendNDAForSigning, checkEnvelopeStatus } = require('../services/ndaService');
+const { createEscrowHold, hasEscrowDeposit } = require('../services/escrowService');
 const pool = require('../config/db');
 
 const router = express.Router();
@@ -122,15 +123,12 @@ router.post('/:id/layers/:layerNumber/unlock', protect, async (req, res) => {
   }
 });
 
-// ─── POST /api/ideas/:id/nda — send NDA to viewer ────────────────────────────
 router.post('/:id/nda', protect, async (req, res) => {
   try {
     const { viewer_email, viewer_name } = req.body;
     if (!viewer_email || !viewer_name) {
       return res.status(400).json({ error: 'viewer_email and viewer_name are required' });
     }
-
-    // Get idea details
     const { rows } = await pool.query(
       `SELECT i.title, u.username AS creator_name
        FROM ideas i JOIN users u ON u.id = i.creator_id
@@ -138,7 +136,6 @@ router.post('/:id/nda', protect, async (req, res) => {
       [req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Idea not found' });
-
     const result = await sendNDAForSigning({
       ideaId:      req.params.id,
       ideaTitle:   rows[0].title,
@@ -146,7 +143,6 @@ router.post('/:id/nda', protect, async (req, res) => {
       viewerName:  viewer_name,
       viewerEmail: viewer_email,
     });
-
     res.json({
       message:     'NDA sent for signing',
       envelope_id: result.envelopeId,
@@ -159,7 +155,6 @@ router.post('/:id/nda', protect, async (req, res) => {
   }
 });
 
-// ─── GET /api/ideas/:id/nda/:envelopeId — check NDA signing status ────────────
 router.get('/:id/nda/:envelopeId', protect, async (req, res) => {
   try {
     const status = await checkEnvelopeStatus(req.params.envelopeId);
@@ -167,6 +162,40 @@ router.get('/:id/nda/:envelopeId', protect, async (req, res) => {
   } catch (err) {
     console.error('[GET /ideas/:id/nda/:envelopeId]', err.message);
     res.status(500).json({ error: 'Failed to check NDA status' });
+  }
+});
+
+// ─── POST /api/ideas/:id/escrow — create escrow hold for Layer 3 ──────────────
+router.post('/:id/escrow', protect, async (req, res) => {
+  try {
+    const { layer_number, amount_usd } = req.body;
+    if (!layer_number || !amount_usd) {
+      return res.status(400).json({ error: 'layer_number and amount_usd are required' });
+    }
+
+    // Check if already paid
+    const alreadyPaid = await hasEscrowDeposit(req.params.id, req.user.id, layer_number);
+    if (alreadyPaid) {
+      return res.json({ message: 'Escrow already deposited for this layer', already_paid: true });
+    }
+
+    const result = await createEscrowHold({
+      ideaId:      req.params.id,
+      userId:      req.user.id,
+      amountUsd:   amount_usd,
+      layerNumber: layer_number,
+    });
+
+    res.json({
+      message:     'Escrow hold created',
+      payment_ref: result.payment_ref,
+      amount_usd:  result.amount_usd,
+      status:      result.status,
+      stub:        result.stub || false,
+    });
+  } catch (err) {
+    console.error('[POST /ideas/:id/escrow]', err.message);
+    res.status(500).json({ error: 'Failed to create escrow hold' });
   }
 });
 
