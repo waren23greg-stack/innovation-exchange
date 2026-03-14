@@ -15,6 +15,7 @@ const createIdea = async (userId, title, category, askingPriceUsd) => {
     'SELECT id FROM ideas WHERE idea_fingerprint = $1', [fingerprint]
   );
   if (existing.length > 0) throw new Error('Duplicate idea fingerprint detected');
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -31,6 +32,24 @@ const createIdea = async (userId, title, category, askingPriceUsd) => {
       [idea.id, userId, JSON.stringify({ fingerprint, title, timestamp: new Date().toISOString() })]
     );
     await client.query('COMMIT');
+
+    // Run similarity check async (don't block creation)
+    setImmediate(async () => {
+      try {
+        const { checkSimilarity } = require('../services/similarityService');
+        const result = await checkSimilarity(idea.id, title, '');
+        if (result.blocked || result.warning) {
+          await pool.query(
+            `UPDATE ideas SET similarity_flags = $1 WHERE id = $2`,
+            [JSON.stringify(result.similar_ideas), idea.id]
+          );
+        }
+        console.log(`[Similarity] Idea ${idea.id} — score: ${result.score}, blocked: ${result.blocked}`);
+      } catch(err) {
+        console.error('[Similarity] Background check failed:', err.message);
+      }
+    });
+
     return idea;
   } catch (err) {
     await client.query('ROLLBACK');
@@ -142,6 +161,18 @@ const publishIdea = async (ideaId, userId) => {
      WHERE id = $1 RETURNING id, title, status, published_at, idea_fingerprint`,
     [ideaId]
   );
+
+  // Embed idea for future similarity checks
+  setImmediate(async () => {
+    try {
+      const { embedExistingIdea } = require('../services/similarityService');
+      await embedExistingIdea(ideaId, ideaRows[0].title);
+      console.log(`[Similarity] Embedding generated on publish for idea: ${ideaId}`);
+    } catch(err) {
+      console.error('[Similarity] Embed on publish failed:', err.message);
+    }
+  });
+
   return rows[0];
 };
 
