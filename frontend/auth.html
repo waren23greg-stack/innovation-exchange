@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Innovation Exchange — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080d18;--surface:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--teal:#00d4b1;--gold:#f0a830;--text:#e2e8f0;--muted:#6b7f96;--danger:#e05555;--success:#3dd68c;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,177,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,177,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 60% 50% at 30% 30%,rgba(0,212,177,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 70% 70%,rgba(240,168,48,0.05) 0%,transparent 60%);pointer-events:none;}
+.card{background:rgba(13,21,37,0.85);border:1px solid rgba(0,212,177,0.12);border-radius:20px;padding:40px;width:100%;max-width:420px;position:relative;z-index:1;backdrop-filter:blur(20px);box-shadow:0 32px 80px rgba(0,0,0,0.5),inset 0 1px 0 rgba(0,212,177,0.06);}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center;}
+.logo-mark{width:36px;height:36px;background:linear-gradient(135deg,var(--teal),var(--gold));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#080d18;box-shadow:0 4px 16px rgba(0,212,177,0.3);}
+.logo-name{font-weight:800;font-size:18px;}
+.tabs{display:flex;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:28px;}
+.tab{flex:1;padding:8px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.2s;color:var(--muted);border:none;background:none;font-family:'Cabinet Grotesk',sans-serif;}
+.tab.active{background:rgba(0,212,177,0.12);color:var(--teal);border:1px solid rgba(0,212,177,0.2);}
+.form{display:none;}
+.form.active{display:block;}
+.form-group{margin-bottom:16px;}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:0.04em;text-transform:uppercase;}
+input{width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'Cabinet Grotesk',sans-serif;outline:none;transition:all 0.2s;}
+input:focus{border-color:rgba(0,212,177,0.4);box-shadow:0 0 0 3px rgba(0,212,177,0.08);background:rgba(0,212,177,0.03);}
+.btn{width:100%;padding:13px;border-radius:8px;border:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;transition:all 0.2s;margin-top:8px;}
+.btn-teal{background:var(--teal);color:#080d18;box-shadow:0 4px 16px rgba(0,212,177,0.3);}
+.btn-teal:hover{background:#00f0cc;box-shadow:0 6px 24px rgba(0,212,177,0.4);transform:translateY(-1px);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.error{background:rgba(224,85,85,0.08);border:1px solid rgba(224,85,85,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--danger);margin-bottom:16px;display:none;}
+.success{background:rgba(61,214,140,0.08);border:1px solid rgba(61,214,140,0.2);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--success);margin-bottom:16px;display:none;}
+.divider{text-align:center;color:var(--muted);font-size:12px;margin:20px 0;position:relative;}
+.divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);}
+.divider span{background:rgba(13,21,37,0.85);padding:0 12px;position:relative;}
+.fp-preview{background:rgba(0,212,177,0.04);border:1px solid rgba(0,212,177,0.1);border-radius:8px;padding:12px;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6;}
+.fp-preview strong{color:var(--teal);display:block;margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-mark">IX</div>
+    <span class="logo-name">Innovation Exchange</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="form active" id="form-login">
+    <div class="error" id="login-error"></div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-teal" id="login-btn" onclick="login()">Sign In</button>
+    <div class="fp-preview">
+      <strong>🔐 Secure Login</strong>
+      JWT access token (15min) + refresh token (7d) · bcrypt cost=12 · TLS 1.3
+    </div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div class="form" id="form-register">
+    <div class="error" id="register-error"></div>
+    <div class="success" id="register-success"></div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="reg-username" placeholder="innovator_name"/>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="you@example.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="reg-password" placeholder="Min 8 characters"/>
+    </div>
+    <button class="btn btn-teal" id="register-btn" onclick="register()">Create Account</button>
+    <div class="fp-preview">
+      <strong>🛡️ Your account is protected by</strong>
+      KYC verification · AES-256-GCM encryption · Zero-trust architecture
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://innovation-exchange.onrender.com/api';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('form-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-register').classList.toggle('active', tab==='register');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+function showSuccess(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function login() {
+  const btn   = document.getElementById('login-btn');
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  if (!email || !pass) { showError('login-error', 'Email and password are required'); return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const data = await res.json();
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      window.location.href = 'index.html';
+    } else {
+      showError('login-error', data.error || 'Login failed');
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
+  } catch(err) {
+    showError('login-error', 'Network error — is the server running?');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+async function register() {
+  const btn      = document.getElementById('register-btn');
+  const username = document.getElementById('reg-username').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const pass     = document.getElementById('reg-password').value;
+  if (!username || !email || !pass) { showError('register-error', 'All fields are required'); return; }
+  if (pass.length < 8) { showError('register-error', 'Password must be at least 8 characters'); return; }
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  try {
+    const res  = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password: pass })
+    });
+    const data = await res.json();
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      showSuccess('register-success', 'Account created! Redirecting...');
+      setTimeout(() => window.location.href = 'index.html', 1200);
+    } else {
+      showError('register-error', data.error || 'Registration failed');
+      btn.disabled = false; btn.textContent = 'Create Account';
+    }
+  } catch(err) {
+    showError('register-error', 'Network error');
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const loginActive = document.getElementById('form-login').classList.contains('active');
+    if (loginActive) login(); else register();
+  }
+});
+
+// Redirect if already logged in
+if (localStorage.getItem('accessToken')) window.location.href = 'index.html';
+</script>
+</body>
+</html>

@@ -1,259 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Innovation Exchange — View Idea</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>View Idea — Innovation Exchange</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg:#050810;--surface:#0b0f1e;--surface2:#111827;
-    --border:rgba(255,255,255,0.07);--border-bright:rgba(99,179,237,0.3);
-    --gold:#e8c97a;--cyan:#63b3ed;--green:#68d391;--red:#fc8181;
-    --text:#e2e8f0;--muted:#718096;--faint:#2d3748;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
-
-  /* NAV */
-  nav{background:rgba(5,8,16,0.95);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
-  .logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--cyan),var(--gold));border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#050810;}
-  .nav-right{display:flex;align-items:center;gap:16px;}
-  .btn{padding:8px 18px;border-radius:4px;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;text-decoration:none;transition:all 0.2s;}
-  .btn-gold{background:var(--gold);color:#050810;}
-  .btn-ghost{background:transparent;border:1px solid var(--border-bright);color:var(--cyan);}
-
-  /* LAYOUT */
-  .page{max-width:1100px;margin:0 auto;padding:40px 24px;display:grid;grid-template-columns:1fr 340px;gap:32px;}
-  @media(max-width:800px){.page{grid-template-columns:1fr;}}
-
-  /* IDEA HEADER */
-  .idea-header{margin-bottom:28px;}
-  .idea-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(232,201,122,0.1);border:1px solid rgba(232,201,122,0.25);border-radius:100px;padding:4px 12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:14px;}
-  .idea-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(24px,3vw,38px);letter-spacing:-0.02em;margin-bottom:10px;}
-  .idea-meta{display:flex;gap:16px;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
-  .idea-meta span{display:flex;align-items:center;gap:4px;}
-  .fingerprint-box{margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
-  .fp-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-bottom:4px;}
-  .fp-hash{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--cyan);word-break:break-all;}
-
-  /* LAYERS */
-  .layers-section h3{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .layer-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;transition:border-color 0.2s;}
-  .layer-card:hover{border-color:rgba(99,179,237,0.2);}
-  .layer-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
-  .layer-left{display:flex;align-items:center;gap:12px;}
-  .layer-num{width:28px;height:28px;border-radius:50%;background:var(--faint);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);}
-  .layer-num.unlocked{background:rgba(99,179,237,0.15);border-color:var(--cyan);color:var(--cyan);}
-  .layer-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;}
-  .layer-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;letter-spacing:0.04em;}
-  .badge-public{background:rgba(104,211,145,0.1);border:1px solid rgba(104,211,145,0.25);color:var(--green);}
-  .badge-nda{background:rgba(99,179,237,0.1);border:1px solid rgba(99,179,237,0.25);color:var(--cyan);}
-  .badge-escrow{background:rgba(232,201,122,0.1);border:1px solid rgba(232,201,122,0.25);color:var(--gold);}
-  .badge-locked{background:rgba(252,129,129,0.1);border:1px solid rgba(252,129,129,0.2);color:var(--red);}
-
-  /* SECURE VIEWER */
-  .secure-viewer{background:var(--surface2);border-top:1px solid var(--border);position:relative;overflow:hidden;}
-  .viewer-toolbar{padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .viewer-toolbar-left{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:8px;}
-  .secure-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  .viewer-actions{display:flex;gap:8px;}
-  .viewer-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;cursor:default;opacity:0.5;}
-  .content-area{padding:24px;min-height:200px;position:relative;user-select:none;-webkit-user-select:none;}
-  .content-text{font-size:15px;line-height:1.8;color:var(--text);white-space:pre-wrap;}
-  .watermark-overlay{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0.04;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);transform:rotate(-30deg);white-space:nowrap;font-weight:700;letter-spacing:0.1em;text-align:center;line-height:2;}
-  .viewer-footer{padding:10px 16px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);display:flex;justify-content:space-between;}
-
-  /* UNLOCK PANEL */
-  .unlock-panel{padding:20px;border-top:1px solid var(--border);}
-  .unlock-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:12px;}
-  .unlock-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-  .unlock-step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
-  .step-icon{width:20px;height:20px;border-radius:50%;background:var(--faint);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
-  .step-icon.done{background:rgba(104,211,145,0.15);border-color:var(--green);color:var(--green);}
-  .unlock-btn{width:100%;padding:11px;border-radius:4px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.04em;transition:all 0.2s;}
-  .unlock-btn-cyan{background:var(--cyan);color:#050810;}
-  .unlock-btn-cyan:hover{background:#90cdf4;}
-  .unlock-btn-gold{background:var(--gold);color:#050810;}
-  .unlock-btn-gold:hover{background:#f0d888;}
-  .unlock-btn-disabled{background:var(--faint);color:var(--muted);cursor:not-allowed;}
-
-  /* SIDEBAR */
-  .sidebar{}
-  .sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
-  .sidebar-header{background:var(--surface2);border-bottom:1px solid var(--border);padding:12px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.06em;}
-  .sidebar-body{padding:16px;}
-  .price-display{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--gold);margin-bottom:4px;}
-  .price-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:16px;}
-  .sidebar-stat{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
-  .sidebar-stat:last-child{border-bottom:none;}
-  .stat-key{color:var(--muted);}
-  .stat-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);}
-  .stat-val.green{color:var(--green);}
-  .stat-val.gold{color:var(--gold);}
-
-  /* LOADING */
-  .loading{display:flex;align-items:center;justify-content:center;height:200px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);}
-  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  /* SCREENSHOT WARNING */
-  .screenshot-warning{display:none;position:fixed;inset:0;background:rgba(5,8,16,0.97);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-  .screenshot-warning.show{display:flex;}
-  .sw-icon{font-size:48px;}
-  .sw-title{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:var(--red);}
-  .sw-text{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);text-align:center;max-width:400px;}
-  .sw-btn{background:var(--red);color:#050810;font-family:'Syne',sans-serif;font-weight:700;padding:10px 24px;border-radius:4px;border:none;cursor:pointer;margin-top:8px;}
+:root{--bg:#080d18;--surface:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--teal:#00d4b1;--gold:#f0a830;--text:#e2e8f0;--muted:#6b7f96;--danger:#e05555;--success:#3dd68c;--info:#4da6ff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,177,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,177,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+nav{background:rgba(8,13,24,0.9);border-bottom:1px solid rgba(0,212,177,0.08);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text);font-weight:800;font-size:17px;}
+.logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--teal),var(--gold));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#080d18;}
+.btn{padding:8px 18px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;text-decoration:none;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-teal{background:var(--teal);color:#080d18;box-shadow:0 4px 12px rgba(0,212,177,0.25);}
+.btn-teal:hover{background:#00f0cc;transform:translateY(-1px);}
+.btn-gold{background:var(--gold);color:#080d18;box-shadow:0 4px 12px rgba(240,168,48,0.25);}
+.btn-gold:hover{background:#ffc04a;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.15);color:var(--text);}
+.container{max-width:1000px;margin:0 auto;padding:32px 24px;position:relative;z-index:1;}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:24px;transition:color 0.2s;}
+.back:hover{color:var(--text);}
+.hero{background:rgba(13,21,37,0.7);border:1px solid rgba(0,212,177,0.1);border-radius:16px;padding:28px;margin-bottom:20px;backdrop-filter:blur(16px);box-shadow:0 8px 40px rgba(0,0,0,0.3);}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.cat{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;background:rgba(0,212,177,0.08);border:1px solid rgba(0,212,177,0.2);color:var(--teal);margin-bottom:12px;display:inline-block;}
+h1{font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-0.02em;margin-bottom:10px;}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.price-box{text-align:right;flex-shrink:0;}
+.price{font-size:28px;font-weight:800;color:var(--gold);font-family:'Cabinet Grotesk',sans-serif;letter-spacing:-0.02em;}
+.price-label{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.actions-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+.fp-card{background:rgba(0,212,177,0.04);border:1px solid rgba(0,212,177,0.15);border-radius:12px;padding:18px 20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.fp-card::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,212,177,0.05),transparent);animation:scan 4s ease-in-out infinite;}
+@keyframes scan{0%{left:-60%}100%{left:160%}}
+.fp-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--teal);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.fp-hash{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);word-break:break-all;line-height:1.7;text-shadow:0 0 12px rgba(0,212,177,0.3);}
+.fp-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,212,177,0.1);}
+.fp-meta-item label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px;}
+.fp-meta-item span{font-size:12px;font-weight:600;color:var(--text);}
+.grid{display:grid;grid-template-columns:1fr 340px;gap:20px;}
+@media(max-width:800px){.grid{grid-template-columns:1fr;}}
+.layers-title{font-family:'Cabinet Grotesk',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;}
+.layer-card{background:rgba(13,21,37,0.6);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color 0.2s;}
+.layer-card:hover{border-color:rgba(0,212,177,0.15);}
+.layer-card.unlocked{border-color:rgba(0,212,177,0.18);}
+.layer-head{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.layer-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;flex-shrink:0;}
+.ln-unlocked{background:rgba(0,212,177,0.12);border:1px solid rgba(0,212,177,0.25);color:var(--teal);}
+.ln-locked{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.layer-info{flex:1;}
+.layer-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+.layer-cond{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.layer-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.lb-open{background:rgba(61,214,140,0.1);border:1px solid rgba(61,214,140,0.2);color:var(--success);}
+.lb-nda{background:rgba(240,168,48,0.1);border:1px solid rgba(240,168,48,0.2);color:var(--gold);}
+.lb-escrow{background:rgba(77,166,255,0.1);border:1px solid rgba(77,166,255,0.2);color:var(--info);}
+.lb-locked{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.layer-content{padding:0 16px 16px 56px;}
+.content-box{background:rgba(0,0,0,0.25);border:1px solid rgba(0,212,177,0.08);border-radius:8px;padding:14px;font-size:13px;line-height:1.8;color:var(--text);position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;}
+.watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(0,212,177,0.04);white-space:nowrap;pointer-events:none;letter-spacing:3px;font-weight:700;}
+.unlock-panel{padding:14px 16px;border-top:1px solid var(--border);}
+.sidebar-card{background:rgba(13,21,37,0.7);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;backdrop-filter:blur(12px);}
+.sc-head{background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;}
+.sc-body{padding:16px;}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.sc-row:last-child{border-bottom:none;}
+.sc-label{color:var(--muted);}
+.sc-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+.sc-val.teal{color:var(--teal);}
+.sc-val.gold{color:var(--gold);}
+.score-big{font-size:36px;font-weight:800;font-family:'Cabinet Grotesk',sans-serif;letter-spacing:-0.02em;color:var(--teal);}
+.loading{text-align:center;padding:60px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
 </style>
 </head>
 <body>
-
 <nav>
-  <a href="browse-ideas.html" class="logo"><div class="logo-mark">IX</div>Innovation Exchange</a>
-  <div class="nav-right">
-    <a href="browse-ideas.html" class="btn btn-ghost">← Browse</a>
-    <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
+  <a href="index.html" class="logo"><div class="logo-mark">IX</div>Innovation Exchange</a>
+  <div style="display:flex;gap:10px;">
+    <a href="browse-ideas.html" class="btn btn-ghost">← Marketplace</a>
+    <a href="submit-idea.html" class="btn btn-teal">+ Submit Idea</a>
   </div>
 </nav>
 
-<!-- Screenshot warning overlay -->
-<div class="screenshot-warning" id="screenshotWarning">
-  <div class="sw-icon">⚠️</div>
-  <div class="sw-title">Screenshot Detected</div>
-  <div class="sw-text">This attempt has been logged with your identity and watermark token. Unauthorized capture of confidential content may constitute a breach of your NDA.</div>
-  <button class="sw-btn" onclick="dismissWarning()">I Understand</button>
-</div>
-
-<div class="page" id="pageContent">
-  <div class="loading"><div class="spinner"></div>Loading idea...</div>
+<div class="container">
+  <a href="browse-ideas.html" class="back">← Back to Marketplace</a>
+  <div id="content"><div class="loading">Loading idea from the ledger...</div></div>
 </div>
 
 <script>
-const API = 'https://innovation-exchange.onrender.com/api';
-const token = localStorage.getItem('accessToken');
+const API    = 'https://innovation-exchange.onrender.com/api';
+const token  = localStorage.getItem('accessToken');
 const ideaId = new URLSearchParams(window.location.search).get('id');
+const user   = JSON.parse(localStorage.getItem('user') || '{}');
 
-if (!token) window.location.href = 'auth.js';
 if (!ideaId) window.location.href = 'browse-ideas.html';
+if (!token)  window.location.href = 'auth.html';
 
-// ─── Screenshot detection ─────────────────────────────────────────────────────
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') {
-    logScreenshotAttempt();
-  }
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'PrintScreen' || (e.metaKey && e.shiftKey && ['3','4','5'].includes(e.key))) {
-    e.preventDefault();
-    showScreenshotWarning();
-    logScreenshotAttempt();
-  }
-});
-// Disable right click on secure content
-document.addEventListener('contextmenu', (e) => {
-  if (e.target.closest('.content-area')) e.preventDefault();
-});
-
-function showScreenshotWarning() {
-  document.getElementById('screenshotWarning').classList.add('show');
-}
-function dismissWarning() {
-  document.getElementById('screenshotWarning').classList.remove('show');
-}
-async function logScreenshotAttempt() {
-  try {
-    await fetch(`${API}/ideas/${ideaId}/screenshot`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-    });
-  } catch(e) {}
-}
-
-// ─── Fetch and render idea ────────────────────────────────────────────────────
 async function loadIdea() {
   try {
-    const res = await fetch(`${API}/ideas/${ideaId}`, {
+    const res  = await fetch(`${API}/ideas/${ideaId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.status === 401) { window.location.href = 'auth.html'; return; }
     const data = await res.json();
-    renderIdea(data.idea);
+    render(data.idea);
   } catch(err) {
-    document.getElementById('pageContent').innerHTML =
-      '<div class="loading">Failed to load idea. Check your connection.</div>';
+    document.getElementById('content').innerHTML = `<div class="loading">Error: ${err.message}</div>`;
   }
 }
 
-function renderIdea(idea) {
-  const page = document.getElementById('pageContent');
-  page.innerHTML = `
-    <div class="main-col">
-      <div class="idea-header">
-        <div class="idea-chip">💡 ${idea.category || 'Uncategorized'}</div>
-        <h1 class="idea-title">${idea.title}</h1>
-        <div class="idea-meta">
-          <span>👤 ${idea.creator_username}</span>
-          <span>📅 ${new Date(idea.created_at).toLocaleDateString()}</span>
-          <span>📊 ${idea.status?.toUpperCase()}</span>
-          <span>🔒 ${idea.layers?.length || 0} layers</span>
+function render(idea) {
+  const isOwner = idea.creator_id === user.id;
+  const doc = document.getElementById('content');
+  doc.innerHTML = `
+    <div class="hero">
+      <div class="hero-top">
+        <div style="flex:1;min-width:0;">
+          <span class="cat">${idea.category || 'Uncategorized'}</span>
+          <h1>${idea.title}</h1>
+          <div class="meta">
+            <span>Creator: <span style="color:var(--text)">${idea.creator_username}</span></span>
+            <span>Status: <span style="color:var(--teal)">${idea.status}</span></span>
+            <span>Layers: <span style="color:var(--text)">${idea.layers?.length || 0}/5</span></span>
+            ${idea.innovation_score ? `<span>Score: <span style="color:var(--gold)">${idea.innovation_score}/100</span></span>` : ''}
+          </div>
         </div>
-        ${idea.idea_fingerprint ? `
-        <div class="fingerprint-box">
-          <div class="fp-label">SHA-256 FINGERPRINT — PROOF OF CREATION</div>
-          <div class="fp-hash">${idea.idea_fingerprint}</div>
-        </div>` : ''}
+        <div class="price-box">
+          <div class="price">${idea.asking_price_usd ? '$' + Number(idea.asking_price_usd).toLocaleString() : 'License Only'}</div>
+          <div class="price-label">asking price</div>
+        </div>
       </div>
-
-      <div class="layers-section">
-        <h3>🗄️ Controlled Idea Disclosure — ${idea.layers?.length || 0} Layers</h3>
-        ${(idea.layers || []).map(layer => renderLayer(layer, idea)).join('')}
+      <div class="actions-row">
+        <button class="btn btn-gold" onclick="downloadCert()">📜 Download IP Certificate</button>
+        ${isOwner ? `<button class="btn btn-teal" onclick="computeScore()">⚡ Compute Score</button>` : ''}
+        <button class="btn btn-ghost" onclick="sendNDA()">📝 Request NDA Access</button>
       </div>
     </div>
 
-    <div class="sidebar">
-      <div class="sidebar-card">
-        <div class="sidebar-header">ASKING PRICE</div>
-        <div class="sidebar-body">
-          <div class="price-display">$${Number(idea.asking_price_usd || 0).toLocaleString()}</div>
-          <div class="price-label">USD — negotiable</div>
-          <button class="unlock-btn unlock-btn-gold" style="margin-top:8px;" onclick="contactCreator()">
-            💬 Contact Creator
-          </button>
-        </div>
+    <div class="fp-card">
+      <div class="fp-label">🔐 Cryptographic Proof of Ownership</div>
+      <div class="fp-hash">SHA-256: ${idea.idea_fingerprint}</div>
+      <div class="fp-meta">
+        <div class="fp-meta-item"><label>Created</label><span>${new Date(idea.created_at).toLocaleDateString()}</span></div>
+        <div class="fp-meta-item"><label>Algorithm</label><span>SHA-256</span></div>
+        <div class="fp-meta-item"><label>Status</label><span style="color:var(--teal)">${idea.status}</span></div>
       </div>
-      <div class="sidebar-card">
-        <div class="sidebar-header">IDEA DETAILS</div>
-        <div class="sidebar-body">
-          <div class="sidebar-stat">
-            <span class="stat-key">Status</span>
-            <span class="stat-val green">${idea.status}</span>
+    </div>
+
+    <div class="grid">
+      <div>
+        <div class="layers-title">🗄️ Controlled Idea Disclosure — ${idea.layers?.length || 0} Layers</div>
+        ${(idea.layers || []).map(layer => renderLayer(layer, idea)).join('')}
+      </div>
+      <div>
+        ${idea.innovation_score ? `
+        <div class="sidebar-card">
+          <div class="sc-head">Innovation Score</div>
+          <div class="sc-body" style="text-align:center;padding:20px;">
+            <div class="score-big">${idea.innovation_score}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">out of 100</div>
           </div>
-          <div class="sidebar-stat">
-            <span class="stat-key">Category</span>
-            <span class="stat-val">${idea.category || '—'}</span>
-          </div>
-          <div class="sidebar-stat">
-            <span class="stat-key">Innovation Score</span>
-            <span class="stat-val gold">${idea.innovation_score || '—'}</span>
-          </div>
-          <div class="sidebar-stat">
-            <span class="stat-key">Layers</span>
-            <span class="stat-val">${idea.layers?.length || 0} / 5</span>
-          </div>
-          <div class="sidebar-stat">
-            <span class="stat-key">Created</span>
-            <span class="stat-val">${new Date(idea.created_at).toLocaleDateString()}</span>
+        </div>` : ''}
+        <div class="sidebar-card">
+          <div class="sc-head">Idea Details</div>
+          <div class="sc-body">
+            <div class="sc-row"><span class="sc-label">Category</span><span class="sc-val">${idea.category || '—'}</span></div>
+            <div class="sc-row"><span class="sc-label">Status</span><span class="sc-val teal">${idea.status}</span></div>
+            <div class="sc-row"><span class="sc-label">Layers</span><span class="sc-val">${idea.layers?.length || 0} / 5</span></div>
+            <div class="sc-row"><span class="sc-label">Asking Price</span><span class="sc-val gold">${idea.asking_price_usd ? '$' + Number(idea.asking_price_usd).toLocaleString() : '—'}</span></div>
+            <div class="sc-row"><span class="sc-label">Created</span><span class="sc-val">${new Date(idea.created_at).toLocaleDateString()}</span></div>
           </div>
         </div>
-      </div>
-      <div class="sidebar-card">
-        <div class="sidebar-header">CERTIFICATE</div>
-        <div class="sidebar-body">
-          <button class="unlock-btn unlock-btn-cyan" onclick="viewCertificate('${idea.id}')">
-            📜 View IP Certificate
-          </button>
+        <div class="sidebar-card">
+          <div class="sc-head">IP Certificate</div>
+          <div class="sc-body">
+            <button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="downloadCert()">📜 Download PDF Certificate</button>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6;">Court-admissible proof of IP creation with SHA-256 attestation</div>
+          </div>
         </div>
       </div>
     </div>
@@ -262,175 +187,104 @@ function renderIdea(idea) {
 
 function renderLayer(layer, idea) {
   const conditions = layer.unlock_conditions || {};
-  let badgeClass = 'badge-public';
-  let badgeText = 'PUBLIC';
-  if (conditions.nda_required) { badgeClass = 'badge-nda'; badgeText = 'NDA REQUIRED'; }
-  if (conditions.escrow_amount_usd) { badgeClass = 'badge-escrow'; badgeText = `ESCROW $${conditions.escrow_amount_usd}`; }
-  if (layer.layer_number >= 4) { badgeClass = 'badge-locked'; badgeText = 'RESTRICTED'; }
+  let badge = `<span class="layer-badge lb-locked">LOCKED</span>`;
+  let condText = 'Restricted';
+  if (layer.layer_number === 1) { badge = `<span class="layer-badge lb-open">PUBLIC</span>`; condText = 'Visible to all'; }
+  else if (conditions.nda_required && !conditions.escrow_amount_usd) { badge = `<span class="layer-badge lb-nda">NDA REQUIRED</span>`; condText = 'Sign NDA to unlock'; }
+  else if (conditions.escrow_amount_usd) { badge = `<span class="layer-badge lb-escrow">ESCROW $${conditions.escrow_amount_usd}</span>`; condText = `Deposit $${conditions.escrow_amount_usd} escrow`; }
+  if (layer.can_access) { badge = `<span class="layer-badge lb-open">UNLOCKED</span>`; condText = 'Access granted'; }
 
   return `
-  <div class="layer-card" id="layer-${layer.layer_number}">
-    <div class="layer-header" onclick="toggleLayer(${layer.layer_number})">
-      <div class="layer-left">
-        <div class="layer-num ${layer.can_access ? 'unlocked' : ''}">${layer.layer_number}</div>
-        <div>
-          <div class="layer-name">${layer.layer_name}</div>
-        </div>
+  <div class="layer-card ${layer.can_access ? 'unlocked' : ''}">
+    <div class="layer-head">
+      <div class="layer-num ${layer.can_access ? 'ln-unlocked' : 'ln-locked'}">${layer.layer_number}</div>
+      <div class="layer-info">
+        <div class="layer-name">${layer.layer_name}</div>
+        <div class="layer-cond">${condText}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span class="layer-badge ${badgeClass}">${badgeText}</span>
-        <span style="color:var(--muted);font-size:12px;">${layer.can_access ? '▼' : '🔒'}</span>
-      </div>
+      ${badge}
     </div>
-    ${layer.can_access && layer.content ? renderSecureViewer(layer) : renderUnlockPanel(layer, idea)}
+    ${layer.can_access && layer.content
+      ? `<div class="layer-content">
+           <div class="content-box" oncontextmenu="return false;" oncopy="return false;">
+             <div class="watermark">CONFIDENTIAL • INNOVATION EXCHANGE • ${user.username || 'VIEWER'}</div>
+             ${layer.content.replace(/\n/g,'<br>')}
+           </div>
+         </div>`
+      : !layer.can_access
+      ? `<div class="unlock-panel">
+           ${conditions.nda_required && !conditions.escrow_amount_usd
+             ? `<button class="btn btn-gold" onclick="sendNDA()">📝 Sign NDA to Unlock</button>`
+             : conditions.escrow_amount_usd
+             ? `<button class="btn" style="background:#4da6ff;color:#080d18;font-weight:700;" onclick="depositEscrow(${layer.layer_number},${conditions.escrow_amount_usd})">💰 Deposit $${conditions.escrow_amount_usd} Escrow</button>`
+             : layer.layer_number === 1
+             ? `<button class="btn btn-teal" onclick="unlockLayer(${layer.layer_number})">🔓 Unlock Free Layer</button>`
+             : `<span style="font-size:12px;color:var(--muted)">Contact creator for access</span>`
+           }
+         </div>`
+      : ''
+    }
   </div>`;
 }
 
-function renderSecureViewer(layer) {
-  const watermarkText = `CONFIDENTIAL • ${new Date().toISOString()} • ${layer.watermark_token || 'IX'}`;
-  return `
-  <div class="secure-viewer">
-    <div class="viewer-toolbar">
-      <div class="viewer-toolbar-left">
-        <span class="secure-dot"></span>
-        SECURE VIEWER — LAYER ${layer.layer_number}
-      </div>
-      <div class="viewer-actions">
-        <span class="viewer-btn">⛔ No Download</span>
-        <span class="viewer-btn">⛔ No Print</span>
-        <span class="viewer-btn">⛔ No Copy</span>
-      </div>
-    </div>
-    <div class="content-area" oncontextmenu="return false;" oncopy="return false;">
-      <div class="watermark-overlay">${watermarkText} • ${watermarkText} • ${watermarkText}</div>
-      <div class="content-text">${layer.content}</div>
-    </div>
-    <div class="viewer-footer">
-      <span>🔐 AES-256-GCM Encrypted</span>
-      <span>Unlock #${layer.unlock_count || 1} • ${new Date().toLocaleTimeString()}</span>
-    </div>
-  </div>`;
-}
-
-function renderUnlockPanel(layer, idea) {
-  const conditions = layer.unlock_conditions || {};
-  let steps = [];
-  let btnText = '🔓 Request Access';
-  let btnClass = 'unlock-btn-cyan';
-  let btnAction = `requestAccess(${layer.layer_number})`;
-
-  if (layer.layer_number === 1) {
-    btnText = '🔓 Unlock Free Layer';
-    btnAction = `unlockLayer(${layer.layer_number})`;
-  } else if (conditions.nda_required) {
-    steps.push({ icon: '📝', text: 'Sign NDA', done: false });
-    btnText = '📝 Sign NDA to Unlock';
-    btnAction = `sendNDA(${layer.layer_number})`;
-  }
-  if (conditions.escrow_amount_usd) {
-    steps.push({ icon: '💰', text: `Deposit $${conditions.escrow_amount_usd} escrow`, done: false });
-    btnText = `💰 Deposit $${conditions.escrow_amount_usd} Escrow`;
-    btnClass = 'unlock-btn-gold';
-    btnAction = `depositEscrow(${layer.layer_number}, ${conditions.escrow_amount_usd})`;
-  }
-
-  return `
-  <div class="unlock-panel">
-    <div class="unlock-title">🔐 Access Required</div>
-    ${steps.length > 0 ? `
-    <div class="unlock-steps">
-      ${steps.map(s => `
-      <div class="unlock-step">
-        <div class="step-icon ${s.done ? 'done' : ''}">${s.done ? '✓' : '→'}</div>
-        <span>${s.text}</span>
-      </div>`).join('')}
-    </div>` : ''}
-    <button class="unlock-btn ${btnClass}" onclick="${btnAction}">${btnText}</button>
-  </div>`;
-}
-
-// ─── Actions ──────────────────────────────────────────────────────────────────
-async function unlockLayer(layerNumber) {
+async function unlockLayer(n) {
   try {
-    const res = await fetch(`${API}/ideas/${ideaId}/layers/${layerNumber}/unlock`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
+    const res  = await fetch(`${API}/ideas/${ideaId}/layers/${n}/unlock`, {
+      method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}, body:'{}'
     });
     const data = await res.json();
-    if (data.layer) {
-      loadIdea(); // Refresh to show decrypted content
-    } else {
-      alert(data.error || 'Unlock failed');
-    }
-  } catch(err) {
-    alert('Network error');
-  }
+    if (data.layer) loadIdea();
+    else alert(data.error || 'Unlock failed');
+  } catch(err) { alert('Error: ' + err.message); }
 }
 
-async function sendNDA(layerNumber) {
-  const email = prompt('Enter your email to receive the NDA:');
-  const name  = prompt('Enter your full name:');
+async function sendNDA() {
+  const email = prompt('Your email for NDA:');
+  const name  = prompt('Your full name:');
   if (!email || !name) return;
-  try {
-    const res = await fetch(`${API}/ideas/${ideaId}/nda`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ viewer_email: email, viewer_name: name })
-    });
-    const data = await res.json();
-    if (data.envelope_id) {
-      alert(`NDA sent to ${email}. Once signed, use envelope ID to unlock:\n${data.envelope_id}`);
-    }
-  } catch(err) {
-    alert('Failed to send NDA');
-  }
+  const res  = await fetch(`${API}/ideas/${ideaId}/nda`, {
+    method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body: JSON.stringify({ viewer_email: email, viewer_name: name })
+  });
+  const data = await res.json();
+  alert(`NDA sent to ${email}!\nEnvelope ID: ${data.envelope_id}\nOnce signed, use this to unlock Layer 2.`);
 }
 
-async function depositEscrow(layerNumber, amount) {
-  if (!confirm(`Deposit $${amount} escrow to access Layer ${layerNumber}?`)) return;
-  try {
-    const res = await fetch(`${API}/ideas/${ideaId}/escrow`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ layer_number: layerNumber, amount_usd: amount })
-    });
-    const data = await res.json();
-    if (data.payment_ref) {
-      alert(`Escrow deposited! Ref: ${data.payment_ref}\nYou can now unlock Layer ${layerNumber}`);
-      loadIdea();
-    }
-  } catch(err) {
-    alert('Escrow failed');
-  }
+async function depositEscrow(n, amount) {
+  if (!confirm(`Deposit $${amount} escrow to access Layer ${n}?`)) return;
+  const res  = await fetch(`${API}/ideas/${ideaId}/escrow`, {
+    method:'POST', headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body: JSON.stringify({ layer_number: n, amount_usd: amount })
+  });
+  const data = await res.json();
+  if (data.payment_ref) { alert(`Escrow deposited! Ref: ${data.payment_ref}`); loadIdea(); }
+  else alert(data.error || 'Escrow failed');
 }
 
-async function viewCertificate(id) {
+async function downloadCert() {
   try {
-    const res = await fetch(`${API}/ideas/${id}/certificate`, {
+    const res = await fetch(`${API}/ideas/${ideaId}/certificate/pdf`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    const data = await res.json();
-    const cert = data.certificate;
-    alert(`IP CERTIFICATE\n\nTitle: ${cert.title}\nCreator: ${cert.creator}\nFingerprint: ${cert.idea_fingerprint}\nAlgorithm: ${cert.algorithm}\nCreated: ${cert.created_at}\nStatus: ${cert.status}`);
-  } catch(err) {
-    alert('Failed to load certificate');
-  }
+    if (!res.ok) { alert('Failed to generate certificate'); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `IX-Certificate-${ideaId}.pdf`;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  } catch(err) { alert('Error: ' + err.message); }
 }
 
-function contactCreator() {
-  alert('Encrypted messaging coming in Week 3!');
+async function computeScore() {
+  const res  = await fetch(`${API}/ideas/${ideaId}/score`, {
+    method:'POST', headers:{'Authorization':`Bearer ${token}`}
+  });
+  const data = await res.json();
+  if (data.score !== undefined) { alert(`Innovation Score: ${data.score}/100 — ${data.label}`); loadIdea(); }
+  else alert(data.error || 'Score failed');
 }
 
-function toggleLayer(num) {
-  // Already handled by can_access rendering
-}
-
-function requestAccess(layerNumber) {
-  alert(`Contact the creator to request access to Layer ${layerNumber}`);
-}
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
 loadIdea();
 </script>
 </body>
