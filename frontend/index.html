@@ -909,3 +909,121 @@ function toast(msg, type = 'info') {
 </script>
 </body>
 </html>
+<script>
+// ── LIVE API WIRING ──────────────────────────────────────────────────────────
+const IX_API = 'https://innovation-exchange.onrender.com/api';
+const IX_TOKEN = localStorage.getItem('accessToken');
+const IX_USER = JSON.parse(localStorage.getItem('user') || '{}');
+
+// Update user info in sidebar
+if (IX_USER.username) {
+  const avatarEl = document.querySelector('.user-avatar');
+  const nameEl   = document.querySelector('.user-name');
+  if (avatarEl) avatarEl.textContent = IX_USER.username.substring(0,2).toUpperCase();
+  if (nameEl)   nameEl.textContent   = IX_USER.username;
+}
+
+// Load real ideas into marketplace
+async function loadMarketplaceIdeas() {
+  try {
+    const res   = await fetch(`${IX_API}/ideas`);
+    const data  = await res.json();
+    const ideas = data.ideas || [];
+    const grid  = document.querySelector('#page-marketplace .ideas-grid');
+    if (!grid || ideas.length === 0) return;
+    grid.innerHTML = ideas.map(idea => `
+      <div class="idea-card" onclick="window.location.href='view-idea.html?id=${idea.id}'">
+        <div class="idea-card-top">
+          <div class="cat-tag teal">${idea.category || 'Uncategorized'}</div>
+          <div class="score-ring">
+            <svg width="34" height="34">
+              <circle cx="17" cy="17" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/>
+              <circle cx="17" cy="17" r="14" fill="none" stroke="#00d4b1" stroke-width="2.5"
+                stroke-dasharray="${(idea.innovation_score || 0) / 100 * 87.96} 87.96" stroke-linecap="round"/>
+            </svg>
+            <span class="score-ring-num">${idea.innovation_score || '—'}</span>
+          </div>
+        </div>
+        <div class="idea-title">${idea.title}</div>
+        <div class="idea-teaser">by ${idea.creator_username} &bull; ${idea.layer_count || 0} layers</div>
+        <div class="idea-meta">
+          <div class="meta-item">${idea.layer_count || 0} layers</div>
+          <div class="meta-price">${idea.asking_price_usd ? '$' + Number(idea.asking_price_usd).toLocaleString() : 'License Only'}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch(err) { console.error('Failed to load ideas:', err); }
+}
+
+// Wire submit form to live API
+async function submitIdea() {
+  if (!IX_TOKEN) { alert('Please log in first'); return; }
+  const title    = document.getElementById('idea-title')?.value?.trim();
+  const category = document.getElementById('idea-cat')?.value;
+  const price    = document.getElementById('idea-price')?.value;
+  const layer1   = document.getElementById('layer-1')?.value?.trim();
+  if (!title) { toast('Idea title is required.', 'error'); return; }
+  if (!category) { toast('Please select a category.', 'error'); return; }
+  if (!layer1) { toast('Layer 1 (Public Teaser) is required.', 'error'); return; }
+
+  toast('Generating cryptographic fingerprint...', 'info');
+  try {
+    // Create idea
+    const ideaRes  = await fetch(`${IX_API}/ideas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${IX_TOKEN}` },
+      body: JSON.stringify({ title, category, asking_price_usd: price || null })
+    });
+    const ideaData = await ideaRes.json();
+    if (!ideaData.idea) { toast(ideaData.error || 'Failed to create idea', 'error'); return; }
+
+    toast('Anchoring to Ownership Ledger...', 'info');
+
+    // Add Layer 1
+    await fetch(`${IX_API}/ideas/${ideaData.idea.id}/layers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${IX_TOKEN}` },
+      body: JSON.stringify({ layer_number: 1, layer_name: 'Public Teaser', content: layer1, unlock_conditions: {} })
+    });
+
+    // Add other layers if filled
+    const layerDefs = [
+      { num: 2, name: 'Market Concept',       id: 'layer-2', conditions: { nda_required: true } },
+      { num: 3, name: 'Technical Concept',    id: 'layer-3', conditions: { kyc_required: true, escrow_amount_usd: 500 } },
+      { num: 4, name: 'Implementation Details', id: 'layer-4', conditions: { kyc_required: true } },
+      { num: 5, name: 'Full Proprietary Concept', id: 'layer-5', conditions: { kyc_required: true, nda_required: true } },
+    ];
+    for (const l of layerDefs) {
+      const content = document.getElementById(l.id)?.value?.trim();
+      if (content) {
+        await fetch(`${IX_API}/ideas/${ideaData.idea.id}/layers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${IX_TOKEN}` },
+          body: JSON.stringify({ layer_number: l.num, layer_name: l.name, content, unlock_conditions: l.conditions })
+        });
+      }
+    }
+
+    // Publish idea
+    await fetch(`${IX_API}/ideas/${ideaData.idea.id}/publish`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${IX_TOKEN}` }
+    });
+
+    toast(`Idea submitted! Fingerprint: ${ideaData.idea.idea_fingerprint.substring(0,16)}...`, 'success');
+    setTimeout(() => navigate('marketplace'), 1500);
+  } catch(err) {
+    toast('Error: ' + err.message, 'error');
+  }
+}
+
+// Load marketplace on navigate
+const origNavigate = window.navigate;
+window.navigate = function(page) {
+  origNavigate(page);
+  if (page === 'marketplace') loadMarketplaceIdeas();
+};
+
+// Load on startup if on marketplace
+if (document.querySelector('#page-marketplace.active')) loadMarketplaceIdeas();
+</script>

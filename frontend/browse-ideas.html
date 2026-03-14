@@ -1,22 +1,84 @@
-<h2>Browse Ideas</h2>
-<div id="ideasList"></div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Browse Ideas — Innovation Exchange</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#080d18;--surface:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.07);--teal:#00d4b1;--gold:#f0a830;--text:#e2e8f0;--muted:#6b7f96;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;min-height:100vh;padding:24px;}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,177,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,177,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+.container{max-width:1100px;margin:0 auto;position:relative;z-index:1;}
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.logo{font-weight:800;font-size:18px;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-mark{width:28px;height:28px;background:linear-gradient(135deg,var(--teal),var(--gold));border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#080d18;}
+.btn{padding:8px 18px;border-radius:8px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;text-decoration:none;transition:all 0.2s;}
+.btn-teal{background:var(--teal);color:#080d18;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+h1{font-size:28px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;}
+.sub{color:var(--muted);font-size:14px;margin-bottom:28px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.card{background:rgba(13,21,37,0.7);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;display:block;}
+.card:hover{border-color:rgba(0,212,177,0.25);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.4);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.cat{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;padding:3px 10px;border-radius:20px;background:rgba(0,212,177,0.08);border:1px solid rgba(0,212,177,0.2);color:var(--teal);}
+.score{font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(240,168,48,0.08);border:1px solid rgba(240,168,48,0.2);color:var(--gold);}
+.card-title{font-size:15px;font-weight:700;letter-spacing:-0.01em;margin-bottom:8px;}
+.card-meta{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.price{color:var(--gold);font-weight:500;}
+.loading{text-align:center;padding:60px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.empty{text-align:center;padding:60px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="container">
+  <nav>
+    <a href="index.html" class="logo"><div class="logo-mark">IX</div>Innovation Exchange</a>
+    <div style="display:flex;gap:10px;">
+      <a href="submit-idea.html" class="btn btn-teal">+ Submit Idea</a>
+      <a href="index.html" class="btn btn-ghost">Dashboard</a>
+    </div>
+  </nav>
+  <h1>Idea Marketplace</h1>
+  <p class="sub" id="sub">Loading ideas...</p>
+  <div class="grid" id="grid"><div class="loading">Fetching ideas from the ledger...</div></div>
+</div>
 <script>
-(async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:5000/api/ideas/browse', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
+const API   = 'https://innovation-exchange.onrender.com/api';
+const token = localStorage.getItem('accessToken');
+
+async function load() {
+  try {
+    const res  = await fetch(`${API}/ideas`);
     const data = await res.json();
-    const ideasList = document.getElementById('ideasList');
-    data.ideas.forEach(idea => {
-        const div = document.createElement('div');
-        div.innerHTML = `
-            <h3>${idea.title}</h3>
-            <p>Accessible Layers: ${idea.accessible_layers}</p>
-            <a href="view-idea.html?id=${idea.id}">View Layers</a>
-        `;
-        ideasList.appendChild(div);
-    });
-})();
+    const ideas = data.ideas || [];
+    const grid  = document.getElementById('grid');
+    const sub   = document.getElementById('sub');
+    sub.textContent = `${ideas.length} verified ideas — all IP cryptographically fingerprinted`;
+    if (ideas.length === 0) {
+      grid.innerHTML = '<div class="empty">No published ideas yet. Be the first to submit!</div>';
+      return;
+    }
+    grid.innerHTML = ideas.map(idea => `
+      <a class="card" href="view-idea.html?id=${idea.id}">
+        <div class="card-top">
+          <span class="cat">${idea.category || 'Uncategorized'}</span>
+          ${idea.innovation_score ? `<span class="score">${idea.innovation_score}/100</span>` : ''}
+        </div>
+        <div class="card-title">${idea.title}</div>
+        <div class="card-meta">
+          <span>by ${idea.creator_username}</span>
+          <span class="price">${idea.asking_price_usd ? '$' + Number(idea.asking_price_usd).toLocaleString() : 'License Only'}</span>
+        </div>
+      </a>
+    `).join('');
+  } catch(err) {
+    document.getElementById('grid').innerHTML = '<div class="loading">Failed to load ideas: ' + err.message + '</div>';
+  }
+}
+load();
 </script>
+</body>
+</html>
