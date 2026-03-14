@@ -244,4 +244,24 @@ router.post('/:id/transfer', protect, async (req, res) => {
   }
 });
 
+
+// ─── POST /api/ideas/:id/score — compute Innovation Score ────────────────────
+router.post('/:id/score', protect, async (req, res) => {
+  try {
+    const { computeInnovationScore, getScoreLabel } = require('../services/innovationScoreService');
+    const breakdown = await computeInnovationScore(req.params.id);
+    const label = getScoreLabel(breakdown.final);
+    res.json({
+      message: 'Innovation Score computed',
+      score:   breakdown.final,
+      label:   label.label,
+      color:   label.color,
+      breakdown,
+    });
+  } catch (err) {
+    console.error('[POST /ideas/:id/score]', err.message);
+    res.status(500).json({ error: 'Failed to compute score' });
+  }
+});
+
 module.exports = router;
