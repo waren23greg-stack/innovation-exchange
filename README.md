@@ -1,137 +1,75 @@
-# innovation-exchange
-Innovation Exchange – Controlled Idea Marketplace
+# Innovation Exchange 🔐
+### The Global Stock Market for Ideas
 
-Tagline: A billion-dollar idea marketplace where innovation, security, and monetization meet.
+> The world's first cryptographically secured intellectual property marketplace — where ideas become legally tradeable assets.
 
-Overview
+[![CI/CD](https://github.com/waren23greg-stack/innovation-exchange/actions/workflows/deploy.yml/badge.svg)](https://github.com/waren23greg-stack/innovation-exchange/actions)
 
-Innovation Exchange is a secure, high-privacy web platform for innovators, investors, and collaborators to:
+## 🌐 Live
+- **App**: https://innovation-exchange.vercel.app
+- **API**: https://innovation-exchange.onrender.com
+- **Health**: https://innovation-exchange.onrender.com/health
 
-Share, explore, and legally buy innovative ideas.
+## 🏗️ Architecture
+- **Frontend**: HTML/CSS/JS — Vercel
+- **Backend**: Node.js + Express 4 — Render
+- **Database**: PostgreSQL 16 — Supabase
+- **Blockchain**: Hyperledger Fabric (IOL)
+- **AI**: Hugging Face sentence-transformers
+- **Auth**: JWT + bcrypt + refresh tokens
 
-Protect intellectual property with Controlled Idea Disclosure (CID) layers.
+## 🔐 Core Features
+| Feature | Status |
+|---|---|
+| SHA-256 Idea Fingerprinting | ✅ Live |
+| AES-256-GCM Layer Encryption | ✅ Live |
+| 5-Layer CID Vault | ✅ Live |
+| Idea Ownership Ledger | ✅ Live |
+| DocuSign NDA Integration | ✅ Live |
+| Escrow Payment Hold | ✅ Live |
+| AI Similarity Detection | ✅ Live |
+| Innovation Score Engine | ✅ Live |
+| Legal PDF Certificate | ✅ Live |
+| Secure Document Viewer | ✅ Live |
+| GitHub Actions CI/CD | ✅ Live |
 
-Seamlessly transfer ownership and monetize ideas in a secure environment.
-
-This platform combines originality, high standards of innovation, and state-of-the-art user experience, designed to outperform existing idea marketplaces.
-
-Killer Features
-
-Controlled Idea Disclosure (CID)
-
-Ideas are revealed in layers (public / paid / owner) to maintain confidentiality.
-
-Progressive unlocking ensures only authorized users see sensitive content.
-
-Ownership & Transfer Mechanism
-
-Layer owners can transfer ownership securely.
-
-Paid layers can be purchased instantly via a smooth modal UI.
-
-Investor & Innovator Matching
-
-Browse and scout promising ideas.
-
-Connect directly with idea creators for legal acquisition or collaboration.
-
-Polished User Experience
-
-Animated layer reveals and modals for purchases and transfers.
-
-Clean and intuitive interface with filters for public/paid/owner layers.
-
-Technology Stack
-Layer	Technology
-Frontend	HTML, CSS, JavaScript
-Backend	Node.js, Express.js
-Database	MySQL (with JSON support for layer unlock tracking)
-Security	JWT Authentication, Layered Access Control (CID)
-Version Control	Git & GitHub
-Architecture Highlights
-
-Backend API manages ideas, layers, and transactions.
-
-Frontend fetches real-time data from APIs, applying CID logic.
-
-Database tracks ideas, layers, ownership, and unlocks.
-
-MVP-ready workflow: login → browse → view idea → purchase/transfer → ownership update.
-
-Database Schema
-
-Ideas Table
-
-CREATE TABLE ideas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  description TEXT
-);
-
-Layers Table
-
-CREATE TABLE layers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  idea_id INT NOT NULL,
-  layer_number INT NOT NULL,
-  content TEXT NOT NULL,
-  access_conditions ENUM('public','owner','paid') NOT NULL,
-  owner_id INT,
-  unlocked_users JSON,
-  FOREIGN KEY (idea_id) REFERENCES ideas(id)
-);
-MVP Highlights
-
-Fully functional frontend + backend + database setup.
-
-Sample data with ideas and layers for testing CID.
-
-Secure ownership and purchase workflows implemented.
-
-Progressive unlocks and modal popups create a billion-dollar startup feel.
-
-Setup Instructions
-
-Clone the repo
-
+## 🚀 Quick Start
+```bash
 git clone https://github.com/waren23greg-stack/innovation-exchange.git
-cd innovation-exchange
-
-Backend
-
-cd backend
+cd innovation-exchange/backend
 npm install
-cp .env.example .env
-# Update DB credentials in .env
-npx nodemon src/server.js
+cp .env.example .env  # fill in your values
+node src/server.js
+```
 
-Database
+## 📡 API Endpoints
+```
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/refresh
 
-mysql -u root -p
-SOURCE database/schema.sql;
+GET  /api/ideas                          — browse published ideas
+POST /api/ideas                          — create idea (auth required)
+GET  /api/ideas/:id                      — get idea with layers
+POST /api/ideas/:id/publish              — publish idea
+POST /api/ideas/:id/layers               — add CID layer
+POST /api/ideas/:id/layers/:n/unlock     — unlock layer
+POST /api/ideas/:id/nda                  — send NDA for signing
+POST /api/ideas/:id/escrow               — deposit escrow
+POST /api/ideas/:id/transfer             — transfer ownership
+POST /api/ideas/:id/score                — compute Innovation Score
+GET  /api/ideas/:id/certificate          — get IP certificate (JSON)
+GET  /api/ideas/:id/certificate/pdf      — download IP certificate (PDF)
+```
 
-Frontend
+## 🔒 Security
+- Zero Trust architecture
+- AES-256-GCM encryption at rest
+- TLS 1.3 in transit
+- JWT (15min) + refresh tokens (7d)
+- INSERT-ONLY disclosure_events table
+- SHA-256 watermarking per viewer session
+- Screenshot detection in secure viewer
 
-Open frontend/index.html in your browser.
-
-Ensure JWT is set for testing CID layers.
-
-Future Roadmap
-
-Real-time payment integration for paid layers.
-
-Search & recommendation engine for investors and creators.
-
-Notifications for layer unlocks and ownership transfers.
-
-Mobile-first UI with responsive animations.
-
-Why Invest?
-
-First platform to protect intellectual property while monetizing innovation in a transparent, secure way.
-
-High scalability potential, bridging innovators, investors, and corporations.
-
-Advanced user experience and CID system set to disrupt idea marketplaces.
-
-Website / MVP Repo: https://github.com/waren23greg-stack/innovation-exchange
+## 📄 License
+MIT — © 2026 Innovation Exchange
